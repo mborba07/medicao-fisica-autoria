@@ -283,150 +283,173 @@ function initState() {
 }
 
 
+
+
 // ═══════════════════════════════════════════════════════
-// INTEGRAÇÃO SHAREPOINT
+// INTEGRAÇÃO SUPABASE — dados em tempo real
 // ═══════════════════════════════════════════════════════
-const SP_CONFIG = {
-  siteId:   'd24cfcbd-0826-4284-8bc2-e14254c69adf',
-  siteUrl:  'https://omincbr.sharepoint.com/sites/PlanejamentoeControledeObras-OM',
-  listName: 'Medio Fsica Autoria  APP',
-  projeto:  'Autoria',
+const SB = {
+  url: 'https://saptnnxonigojjjxicnx.supabase.co',
+  key: 'sb_publishable_MIRdOCs402xbloYDPWrv-A_Ht_1d9Zz',
+  table: 'medicao',
+  projeto: 'Autoria',
 };
 
-let spSyncStatus = 'idle'; // idle | syncing | error | ok
-let spItemCache = {}; // chaveUnica -> itemId do SharePoint
-let syncQueue = {}; // chaveUnica -> {disc,pav,sid,ai,val} — debounce
+let sbCache = {};     // chave_unica -> id do registro
+let syncQueue = {};   // chave_unica -> dados para salvar
 let syncTimer = null;
 
-function spHeaders(extra = {}) {
+function sbHeaders() {
   return {
-    'Accept': 'application/json;odata=nometadata',
-    'Content-Type': 'application/json;odata=nometadata',
-    'X-RequestDigest': window._spPageContextInfo?.formDigestValue || '',
-    ...extra
+    'Content-Type': 'application/json',
+    'apikey': SB.key,
+    'Authorization': 'Bearer ' + SB.key,
+    'Prefer': 'resolution=merge-duplicates',
   };
 }
 
 function setStatus(s, msg) {
-  spSyncStatus = s;
   const el = document.getElementById('save-lbl');
   if (!el) return;
-  if (s === 'syncing') { el.textContent = '⟳ sincronizando...'; el.className = 'save-lbl'; }
-  if (s === 'ok')      { el.textContent = '✓ salvo no SharePoint · ' + new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); el.className = 'save-lbl ok'; }
-  if (s === 'offline') { el.textContent = '⚠ offline — salvo localmente'; el.className = 'save-lbl'; el.style.color='var(--mid)'; }
-  if (s === 'error')   { el.textContent = '✗ erro ao salvar — ' + (msg||''); el.className = 'save-lbl'; el.style.color='var(--low)'; }
+  if (s === 'syncing') { el.textContent = '⟳ sincronizando...'; el.style.color = ''; el.className = 'save-lbl'; }
+  if (s === 'ok')      { el.textContent = '✓ salvo · ' + new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); el.style.color = 'var(--ok)'; el.className = 'save-lbl ok'; }
+  if (s === 'error')   { el.textContent = '✗ erro — ' + (msg||'verifique conexão'); el.style.color = 'var(--low)'; el.className = 'save-lbl'; }
 }
 
-// Verificar se está rodando dentro do SharePoint (tem cookie de auth)
-function isInSharePoint() {
-  return window.location.hostname.includes('sharepoint.com') || window.location.hostname.includes('omincbr');
-}
 
-// Buscar digest para operações de escrita
-async function getDigest() {
+// ── POLLING — verifica mudanças a cada 10s ────────────
+let lastPollTime = new Date().toISOString();
+
+async function sbPoll() {
   try {
-    const r = await fetch(SP_CONFIG.siteUrl + '/_api/contextinfo', {
-      method: 'POST',
-      headers: { 'Accept': 'application/json;odata=nometadata' },
-      credentials: 'include'
+    const url = SB.url + '/rest/v1/' + SB.table +
+      '?projeto=eq.' + encodeURIComponent(SB.projeto) +
+      '&updated_at=gt.' + encodeURIComponent(lastPollTime) +
+      '&select=*&limit=5000';
+    const r = await fetch(url, { headers: sbHeaders() });
+    if (!r.ok) return;
+    const rows = await r.json();
+    if (!rows.length) return;
+
+    let changed = false;
+    rows.forEach(row => {
+      const disc = row.disciplina;
+      const pav  = row.pavimento;
+      const sid  = row.servico_id;
+      const ai   = parseInt(row.final_idx) || 0;
+      const val  = row.valor !== null && row.valor !== undefined ? String(row.valor) : '';
+
+      if (!state[disc] || !state[disc][pav] || state[disc][pav].vals[sid] === undefined) return;
+      if (state[disc][pav].vals[sid][ai] === val) return; // sem mudança
+
+      state[disc][pav].vals[sid][ai] = val;
+      changed = true;
+
+      // Atualizar campo visível que não está em foco
+      const inputEl = document.querySelector(`input[data-key="${disc}|${pav}|${sid}|${ai}"]`);
+      if (inputEl && document.activeElement !== inputEl) {
+        inputEl.value = val;
+        inputEl.classList.toggle('hv', val !== '');
+      }
+
+      // Atualizar badge de média
+      const k    = sid(disc + '_' + pav);
+      const isSafe = sid(sid);
+      const me   = document.getElementById('med_' + k + '_' + isSafe);
+      if (me) {
+        const avg = getMedia(disc, pav, sid);
+        const ar  = avg !== null ? Math.round(avg) : null;
+        me.className = 'badge ' + bClass(ar);
+        me.textContent = fmt(ar);
+      }
+      updatePavHeader(disc, pav);
     });
-    const d = await r.json();
-    return d.FormDigestValue || '';
-  } catch { return ''; }
+
+    if (changed) {
+      lastPollTime = new Date().toISOString();
+      updateSummary();
+      saveState();
+      const lbl = document.getElementById('save-lbl');
+      if (lbl) {
+        lbl.textContent = '↓ atualizado';
+        lbl.style.color = 'var(--mid)';
+        setTimeout(() => setStatus('ok'), 2000);
+      }
+    }
+  } catch(e) { console.error('Poll error:', e); }
 }
 
-// Carregar todos os itens da lista ao iniciar
-async function spLoadAll() {
-  if (!isInSharePoint()) { setStatus('offline'); return; }
+function startPolling() {
+  lastPollTime = new Date(Date.now() - 1000).toISOString();
+  setInterval(sbPoll, 10000); // a cada 10 segundos
+}
+
+// Carregar todos os dados ao abrir o app
+async function sbLoadAll() {
   setStatus('syncing');
   try {
-    const url = SP_CONFIG.siteUrl +
-      `/_api/web/lists/getbytitle('${SP_CONFIG.listName}')/items` +
-      `?$filter=Projeto eq '${SP_CONFIG.projeto}'` +
-      `&$select=Id,Disciplina,Pavimento,ServicoId,FinalIdx,Valor,ChaveUnica,FinalNome` +
-      `&$top=5000`;
-    const r = await fetch(url, { headers: { 'Accept': 'application/json;odata=nometadata' }, credentials: 'include' });
-    if (!r.ok) throw new Error(r.status);
-    const data = await r.json();
-    const items = data.value || [];
+    const url = SB.url + '/rest/v1/' + SB.table +
+      '?projeto=eq.' + encodeURIComponent(SB.projeto) +
+      '&select=*&limit=50000';
+    const r = await fetch(url, { headers: sbHeaders() });
+    if (!r.ok) throw new Error(await r.text());
+    const rows = await r.json();
 
-    // Popular state com dados do SharePoint
-    items.forEach(item => {
-      const disc = item.Disciplina;
-      const pav  = item.Pavimento;
-      const sid  = item.ServicoId;
-      const ai   = parseInt(item.FinalIdx) || 0;
-      const val  = item.Valor !== null && item.Valor !== undefined ? String(item.Valor) : '';
-      const chave = item.ChaveUnica;
-
+    rows.forEach(row => {
+      const disc  = row.disciplina;
+      const pav   = row.pavimento;
+      const sid   = row.servico_id;
+      const ai    = parseInt(row.final_idx) || 0;
+      const val   = row.valor !== null && row.valor !== undefined ? String(row.valor) : '';
+      const chave = row.chave_unica;
       if (state[disc] && state[disc][pav] && state[disc][pav].vals[sid] !== undefined) {
         state[disc][pav].vals[sid][ai] = val;
-        spItemCache[chave] = item.Id;
+        sbCache[chave] = row.id;
       }
     });
 
-    // Atualizar UI
+    // Atualizar UI completa
     DISCIPLINAS.forEach(d => PAVIMENTOS.forEach(pav => updatePavHeader(d.id, pav)));
     buildViewPavimento(PAVIMENTOS[5]);
     updateSummary();
-    setStatus('ok');
-  } catch(e) {
-    console.error('SP load error:', e);
-    setStatus('offline');
-  }
-}
-
-// Salvar um único valor no SharePoint (upsert)
-async function spSaveItem(disc, pav, servId, ai, val) {
-  if (!isInSharePoint()) { saveState(); return; }
-  const chave = `${SP_CONFIG.projeto}|${disc}|${pav}|${servId}|${ai}`;
-  const digest = await getDigest();
-  const body = JSON.stringify({
-    Projeto:     SP_CONFIG.projeto,
-    Disciplina:  disc,
-    Pavimento:   pav,
-    ServicoId:   servId,
-    FinalIdx:    ai,
-    Valor:       val === '' ? null : parseFloat(val),
-    ChaveUnica:  chave,
-  });
-
-  const baseUrl = SP_CONFIG.siteUrl + `/_api/web/lists/getbytitle('${SP_CONFIG.listName}')/items`;
-
-  try {
-    if (spItemCache[chave]) {
-      // UPDATE
-      await fetch(`${baseUrl}(${spItemCache[chave]})`, {
-        method: 'POST',
-        headers: { ...spHeaders({'X-RequestDigest': digest}), 'X-HTTP-Method': 'MERGE', 'IF-MATCH': '*' },
-        body,
-        credentials: 'include'
-      });
-    } else {
-      // CREATE
-      const r = await fetch(baseUrl, {
-        method: 'POST',
-        headers: { ...spHeaders({'X-RequestDigest': digest}) },
-        body,
-        credentials: 'include'
-      });
-      if (r.ok) {
-        const created = await r.json();
-        spItemCache[chave] = created.Id || created.id;
-      }
-    }
-    saveState(); // backup local também
-    setStatus('ok');
-  } catch(e) {
-    console.error('SP save error:', e);
     saveState();
-    setStatus('error', 'verifique conexão');
+    setStatus('ok');
+  } catch(e) {
+    console.error('Supabase load error:', e);
+    setStatus('error', 'falha ao carregar');
   }
 }
 
-// Debounce: agrupa digitações rápidas antes de salvar
+// Salvar um valor (upsert por chave_unica)
+async function sbSave(disc, pav, servId, ai, val) {
+  const chave = SB.projeto + '|' + disc + '|' + pav + '|' + servId + '|' + ai;
+  const body = JSON.stringify({
+    projeto:     SB.projeto,
+    disciplina:  disc,
+    pavimento:   pav,
+    servico_id:  servId,
+    final_idx:   ai,
+    valor:       val === '' ? null : parseFloat(val),
+    chave_unica: chave,
+    updated_at:  new Date().toISOString(),
+  });
+  try {
+    const r = await fetch(SB.url + '/rest/v1/' + SB.table, {
+      method: 'POST',
+      headers: { ...sbHeaders(), 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+      body,
+    });
+    if (!r.ok) throw new Error(await r.text());
+    setStatus('ok');
+  } catch(e) {
+    console.error('Supabase save error:', e);
+    setStatus('error');
+  }
+}
+
+// Debounce: aguarda 1s após última digitação para salvar
 function queueSync(disc, pav, servId, ai, val) {
-  const chave = `${disc}|${pav}|${servId}|${ai}`;
+  const chave = disc + '|' + pav + '|' + servId + '|' + ai;
   syncQueue[chave] = { disc, pav, servId, ai, val };
   setStatus('syncing');
   clearTimeout(syncTimer);
@@ -434,9 +457,9 @@ function queueSync(disc, pav, servId, ai, val) {
     const entries = Object.values(syncQueue);
     syncQueue = {};
     for (const e of entries) {
-      await spSaveItem(e.disc, e.pav, e.servId, e.ai, e.val);
+      await sbSave(e.disc, e.pav, e.servId, e.ai, e.val);
     }
-  }, 1200); // aguarda 1.2s após última digitação
+  }, 1000);
 }
 
 function saveState() {
@@ -553,8 +576,8 @@ function onInput(disc, pav, itemId, ai, el) {
   }
   updatePavHeader(disc,pav);
   updateSummary();
-  saveState(); // backup local
-  queueSync(disc, pav, itemId, ai, v); // sync SharePoint
+  saveState();
+  queueSync(disc, pav, itemId, ai, v);
 }
 
 function onAptoName(disc, pav, ai, el) {
@@ -599,7 +622,7 @@ function buildTable(disc, pav) {
       for(let i=0;i<NUM_APTOS;i++){
         const v=state[disc][pav].vals[s.id][i];
         const hv=v!==''&&v!=null;
-        h+=`<td class="ti"><input class="pi${hv?' hv':''}" type="text" inputmode="decimal" maxlength="5" value="${v||''}" placeholder="—" oninput="onInput('${dS}','${pS}','${iS}',${i},this)"></td>`;
+        h+=`<td class="ti"><input class="pi${hv?' hv':''}" type="text" inputmode="decimal" maxlength="5" value="${v||''}" placeholder="—" data-key="${dS}|${pS}|${iS}|${i}" oninput="onInput('${dS}','${pS}','${iS}',${i},this)"></td>`;
       }
       h+=`<td class="tm"><span class="badge ${bClass(ar)}" id="med_${k}_${is}">${fmt(ar)}</span></td>`;
     }
@@ -737,7 +760,7 @@ function buildViewPavimento(pav) {
         for (let i = 0; i < NUM_APTOS; i++) {
           const v = state[d.id][pav].vals[s.id][i];
           const hv = v !== '' && v != null;
-          tbl += `<td class="ti"><input class="pi${hv?' hv':''}" type="text" inputmode="decimal" maxlength="5" value="${v||''}" placeholder="—" oninput="onInput('${dS}','${pS}','${iS}',${i},this)"></td>`;
+          tbl += `<td class="ti"><input class="pi${hv?' hv':''}" type="text" inputmode="decimal" maxlength="5" value="${v||''}" placeholder="—" data-key="${dS}|${pS}|${iS}|${i}" oninput="onInput('${dS}','${pS}','${iS}',${i},this)"></td>`;
         }
         const pvK=sid(d.id+'_'+pav); const pvIs=sid(s.id);
         tbl += `<td class="tm"><span class="badge ${bClass(avgR)}" id="med_${pvK}_${pvIs}">${fmt(avgR)}</span></td>`;
@@ -863,8 +886,8 @@ function init() {
 
   buildViewPavimento(PAVIMENTOS[5]);
   updateSummary();
-  // Carregar dados do SharePoint (quando aberto pelo SP)
-  spLoadAll();
+  sbLoadAll(); // carregar dados do Supabase
+  startPolling(); // verificar mudanças a cada 10s
 }
 
 init();
