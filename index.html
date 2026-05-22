@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Medição Física — Autoria by Ornare</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0d10;--sf:#111518;--sf2:#181d22;--sf3:#1f262d;--bd:rgba(0,180,255,.12);--bd2:rgba(0,180,255,.22);--tx:#ffffff;--tx2:#b8c8d8;--tx3:#6a8090;--ac:#00b4ff;--ac-d:rgba(0,180,255,.12);--ok:#4ade80;--ok-b:rgba(74,222,128,.12);--mid:#fbbf24;--mid-b:rgba(251,191,36,.12);--low:#f87171;--low-b:rgba(248,113,113,.12);--r:8px;--rl:12px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font-family:'Syne',sans-serif;font-size:14px;min-height:100vh}
+/* HEADER */
+.app-hdr{background:var(--sf);border-bottom:1px solid var(--bd);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:54px;position:sticky;top:0;z-index:200}
+.hdr-l{display:flex;align-items:center;gap:12px}
+.hdr-logo{font-size:14px;font-weight:700;letter-spacing:.12em;color:var(--ac);text-transform:uppercase;font-family:'DM Mono',monospace}
+.hdr-sep{width:1px;height:20px;background:var(--bd2)}
+.hdr-ttl{font-size:13px;color:var(--tx)}
+/* DISCIPLINE TABS */
+.disc-bar{background:var(--sf);border-bottom:1px solid var(--bd);padding:0 24px;display:flex;gap:0;overflow-x:auto;position:sticky;top:54px;z-index:190;cursor:grab;user-select:none;-webkit-user-select:none}
+.disc-bar::-webkit-scrollbar{height:3px}
+.disc-bar::-webkit-scrollbar-thumb{background:var(--sf3);border-radius:2px}
+.dtab{padding:10px 16px;font-size:12px;font-weight:600;color:var(--tx2);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:color .15s,border-color .15s;background:none;border-top:none;border-left:none;border-right:none;font-family:'Syne',sans-serif}
+.dtab:hover{color:var(--tx2)}
+.dtab.active{color:var(--ac);border-bottom-color:var(--ac)}
+/* TOOLBAR */
+.toolbar{background:var(--sf2);border-bottom:1px solid var(--bd);padding:8px 24px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.tlbl{font-size:10px;color:var(--tx2);text-transform:uppercase;letter-spacing:.06em}
+select,.btn{background:var(--sf3);border:1px solid var(--bd2);color:var(--tx);font-family:'Syne',sans-serif;font-size:12px;padding:5px 11px;border-radius:var(--r);cursor:pointer;outline:none;transition:border-color .15s}
+select:hover,.btn:hover{border-color:rgba(255,255,255,.25)}
+.btn-ac{background:var(--ac);color:#0a0d10;border-color:var(--ac);font-weight:700}
+.btn-ac:hover{background:#33c4ff}
+.spacer{flex:1}
+.save-lbl{font-size:10px;color:var(--tx2);font-family:'DM Mono',monospace}
+.save-lbl.ok{color:var(--ok)}
+/* SUMMARY */
+.sum-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--bd);border-bottom:1px solid var(--bd)}
+.sum-card{background:var(--sf);padding:12px 20px}
+.sum-card .sl{font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px}
+.sum-card .sv{font-size:20px;font-weight:700;color:var(--ac);font-family:'DM Mono',monospace}
+.sum-card .ss{font-size:11px;color:var(--tx3);margin-top:2px}
+/* MAIN */
+.main{padding:16px 24px;padding-bottom:40px}
+.disc-panel{display:none}
+.disc-panel.active{display:block}
+/* PAV BLOCK */
+.pav-block{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rl);margin-bottom:5px;overflow:hidden;transition:border-color .2s}
+.pav-block:hover{border-color:var(--bd2)}
+.pav-block.open{border-color:var(--bd2)}
+.pav-hdr{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;user-select:none;transition:background .15s}
+.pav-hdr:hover{background:var(--sf2)}
+.pav-num{font-family:'DM Mono',monospace;font-size:10px;color:var(--tx2);width:22px;text-align:center;flex-shrink:0}
+.pav-nm{font-size:13px;font-weight:600;flex:0 0 135px;white-space:nowrap}
+.pav-bw{flex:1;height:4px;background:var(--sf3);border-radius:2px;overflow:hidden}
+.pav-bf{height:100%;border-radius:2px;transition:width .4s,background .3s}
+.pav-pct{font-family:'DM Mono',monospace;font-size:11px;color:var(--tx);width:38px;text-align:right;flex-shrink:0}
+.chev{width:14px;height:14px;color:var(--tx3);flex-shrink:0;transition:transform .2s;display:flex;align-items:center;justify-content:center}
+.open .chev{transform:rotate(180deg)}
+/* PAV BODY */
+.pav-body{display:none;border-top:1px solid var(--bd)}
+.pav-body.open{display:block}
+/* APTO CONFIG */
+.apto-cfg{padding:8px 16px;display:flex;align-items:center;gap:6px;background:var(--sf2);border-bottom:1px solid var(--bd);flex-wrap:wrap}
+.apto-cfg-lbl{font-size:10px;color:var(--tx2);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
+.apto-inp{background:var(--sf3);border:1px solid var(--bd2);color:var(--tx);font-family:'DM Mono',monospace;font-size:11px;padding:3px 6px;border-radius:5px;width:75px;outline:none;transition:border-color .15s;text-align:center}
+.apto-inp:focus{border-color:var(--ac);box-shadow:0 0 0 1px rgba(0,180,255,.2)}
+/* TABLE */
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:580px}
+thead th{font-size:10px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.06em;padding:7px 10px;text-align:left;border-bottom:1px solid var(--bd);white-space:nowrap;background:var(--sf2)}
+thead th.c{text-align:center}
+.cat-row td{background:var(--sf2);font-size:10px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.06em;padding:5px 10px;border-bottom:1px solid var(--bd)}
+tbody tr{transition:background .1s}
+tbody tr:not(.cat-row):hover td{background:var(--sf2)}
+td{padding:4px 10px;border-bottom:1px solid var(--bd);vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+.tc{font-family:'DM Mono',monospace;font-size:10px;color:var(--tx2);white-space:nowrap;width:96px}
+.tn{font-size:12px;color:var(--tx);max-width:240px}
+.ti{text-align:center;width:64px}
+.tm{text-align:center;width:64px}
+.pi{background:var(--sf3);border:1px solid var(--bd2);color:var(--tx);font-family:'DM Mono',monospace;font-size:12px;padding:3px 0;border-radius:5px;width:50px;text-align:center;outline:none;transition:border-color .15s,background .15s}
+.pi:focus{border-color:var(--ac);background:var(--sf);box-shadow:0 0 0 1px rgba(0,180,255,.2)}
+.pi.hv{color:var(--ac);border-color:rgba(0,180,255,.3)}
+/* BADGES */
+.badge{display:inline-block;font-family:'DM Mono',monospace;font-size:11px;font-weight:500;padding:2px 7px;border-radius:4px;min-width:42px;text-align:center}
+.b-ok{background:var(--ok-b);color:var(--ok)}
+.b-mid{background:var(--mid-b);color:var(--mid)}
+.b-low{background:var(--low-b);color:var(--low)}
+.b-zero{background:rgba(255,255,255,.04);color:#444}
+.b-na{background:transparent;color:var(--tx3)}
+/* PROG COLORS */
+.pg-ok{background:var(--ok)}
+.pg-mid{background:var(--mid)}
+.pg-low{background:var(--low)}
+.pg-z{background:var(--sf3)}
+/* VIEW POR PAVIMENTO */
+.pv-select{display:flex;align-items:center;gap:10px;margin-bottom:1rem;flex-wrap:wrap}
+.pv-select label{font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em}
+.pv-disc-block{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rl);margin-bottom:5px;overflow:hidden}
+.pv-disc-hdr{display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--sf2);border-bottom:1px solid var(--bd)}
+.pv-disc-label{font-size:12px;font-weight:600;color:var(--ac);flex:0 0 200px;white-space:nowrap;font-family:'DM Mono',monospace;letter-spacing:.02em}
+.pv-disc-avg{font-family:'DM Mono',monospace;font-size:12px;color:var(--tx);margin-left:auto}
+/* SCROLLBAR */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--sf3);border-radius:3px}
+@media(max-width:600px){.app-hdr,.main,.toolbar{padding-left:12px;padding-right:12px}.sum-strip{grid-template-columns:repeat(2,1fr)}.disc-bar{padding:0 12px}}
+</style>
+</head>
+<body>
+
+<header class="app-hdr">
+  <div class="hdr-l">
+    <span class="hdr-logo">O.M. <span style="font-weight:400;letter-spacing:.04em;color:var(--tx2)">Incorporadora</span></span>
+    <div class="hdr-sep"></div>
+    <span class="hdr-ttl">Autoria by Ornare — Medição Física</span>
+  </div>
+</header>
+
+<!-- DISCIPLINE TABS -->
+<nav class="disc-bar" id="disc-bar"></nav>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <span class="tlbl">Ir para:</span>
+  <select id="pav-jump" onchange="jumpTo(this.value)">
+    <option value="">— pavimento —</option>
+  </select>
+  <button class="btn" onclick="expandAll()">▼ Expandir todos</button>
+  <button class="btn" onclick="collapseAll()">▲ Recolher</button>
+  <div class="spacer"></div>
+  <span class="save-lbl" id="save-lbl">dados salvos localmente</span>
+  <button class="btn btn-ac" onclick="exportCSV()">↓ Exportar CSV</button>
+</div>
+
+<!-- SUMMARY -->
+<div class="sum-strip">
+  <div class="sum-card"><div class="sl">Avanço geral</div><div class="sv" id="sg">—</div><div class="ss">disciplina ativa</div></div>
+  <div class="sum-card"><div class="sl">Pavimentos lançados</div><div class="sv" id="sp">0</div><div class="ss">de 30 pavimentos</div></div>
+  <div class="sum-card"><div class="sl">Campos preenchidos</div><div class="sv" id="sc">0</div><div class="ss" id="sct">de — total</div></div>
+  <div class="sum-card"><div class="sl">Última atualização</div><div class="sv" style="font-size:13px;padding-top:5px" id="sd">—</div><div class="ss">salvo no navegador</div></div>
+</div>
+
+<div class="main" id="main"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// DADOS — TODAS AS DISCIPLINAS
+// ═══════════════════════════════════════════════════════
+const DISCIPLINAS = [
+  {
+    id:'paredes', label:'02.05 · Paredes', servicos:[
+      {cat:'Alvenaria de vedação',   id:'02.05.01.01', nome:'Alvenaria em tijolo cerâmico'},
+      {cat:'Marcação / Encunhamento',id:'02.05.01.09', nome:'Marcação de Alvenaria'},
+      {cat:'Marcação / Encunhamento',id:'02.05.01.10', nome:'Encunhamento de Alvenaria'},
+      {cat:'Vergas e Pingadeiras',   id:'02.05.02.01', nome:'Verga e Contra-Verga Pré-Moldada de Concreto'},
+    ]
+  },
+  {
+    id:'esq-madeira', label:'02.06 · Esq. Madeira', servicos:[
+      {cat:'Esquadrias de Madeira', id:'02.06.01.01', nome:'Esquadrias de Madeira'},
+      {cat:'Fechaduras e Puxadores', id:'02.06.02.01', nome:'Fechaduras e Puxadores'},
+    ]
+  },
+  {
+    id:'esq-metalica', label:'02.07 · Esq. Metálicas', servicos:[
+      {cat:'Esquadrias de Alumínio', id:'02.07.01.01', nome:'Contramarcos'},
+      {cat:'Esquadrias de Alumínio', id:'02.07.01.02', nome:'Janelas — Alumínio Eletrostático Preto'},
+      {cat:'Esquadrias de Alumínio', id:'02.07.01.03', nome:'Portas — Alumínio Eletrostático Preto'},
+      {cat:'Esquadrias de Alumínio', id:'02.07.01.04', nome:'Guarda Corpo / Gradis'},
+    ]
+  },
+
+  {
+    id:'hidro', label:'02.10 · Hidro', servicos:[
+      {cat:'Hidrossanitária', id:'02.10.02.02', nome:'Passagem de Laje'},
+      {cat:'Hidrossanitária', id:'02.10.02.03', nome:'Prumada'},
+      {cat:'Hidrossanitária', id:'02.10.02.04', nome:'Prolongamentos'},
+      {cat:'Hidrossanitária', id:'02.10.02.05', nome:'Incêndio'},
+      {cat:'Hidrossanitária', id:'02.10.02.10', nome:'Cavaletes de Hidrômetros e VRP'},
+      {cat:'Hidrossanitária', id:'02.10.02.09', nome:'Isométrico'},
+      {cat:'Hidrossanitária', id:'02.10.02.11', nome:'Esgoto Aéreo / Ramais'},
+    ]
+  },
+  {
+    id:'eletrica', label:'02.10 · Elétrica', servicos:[
+      {cat:'Instalações Elétricas', id:'02.09.01.01', nome:'Infra elétrica e sistemas'},
+      {cat:'Instalações Elétricas', id:'02.09.01.02', nome:'Passagem de Laje'},
+      {cat:'Instalações Elétricas', id:'02.09.01.03', nome:'Fiação Elétrica'},
+      {cat:'Instalações Elétricas', id:'02.09.01.04', nome:'Montagem de Medidor'},
+      {cat:'Instalações Elétricas', id:'02.09.01.05', nome:'Acabamento Elétrico'},
+      {cat:'Instalações Elétricas', id:'02.09.01.06', nome:'Quadros elétricos e de comandos'},
+      {cat:'Instalações Elétricas', id:'02.09.01.07', nome:'SPDA'},
+      {cat:'Instalações Elétricas', id:'02.09.01.08', nome:'Elevadores'},
+    ]
+  },
+  {
+    id:'inst-esp', label:'02.10 · Inst. Especiais', servicos:[
+      {cat:'Instalações Especiais', id:'02.10.02.02', nome:'Instalações de Ar Condicionado'},
+      {cat:'Instalações Especiais', id:'02.10.02.04', nome:'Gás GLP (material + MO)'},
+      {cat:'Instalações Especiais', id:'02.10.02.05', nome:'Exaustor Banhos e Serviço'},
+      {cat:'Instalações Especiais', id:'02.10.02.09', nome:'Exaustor Churrasqueiras'},
+    ]
+  },
+  {
+    id:'loucas', label:'02.11 · Louças / Metais', servicos:[
+      {cat:'Louças, Metais e Bancadas', id:'02.11.01.01', nome:'Louças e Metais'},
+      {cat:'Louças, Metais e Bancadas', id:'02.11.03.01', nome:'Bancadas'},
+    ]
+  },
+  {
+    id:'rev-reboco', label:'02.13 · Reboco', servicos:[
+      {cat:'Reboco e Chapisco', id:'02.13.01.01', nome:'Talisca'},
+      {cat:'Reboco e Chapisco', id:'02.13.01.02', nome:'Chapisco'},
+      {cat:'Reboco e Chapisco', id:'02.13.01.03', nome:'Reboco Interno'},
+    ]
+  },
+  {
+    id:'rev-ceramico', label:'02.13 · Rev. Cerâmico', servicos:[
+      {cat:'Revestimentos Cerâmicos', id:'02.13.02.01', nome:'Forma Branco'},
+      {cat:'Revestimentos Cerâmicos', id:'02.13.02.02', nome:'Rev 60x60'},
+    ]
+  },
+  {
+    id:'forro', label:'02.15 · Forro de Gesso', servicos:[
+      {cat:'Forro', id:'02.15.01.01', nome:'Forro de Gesso'},
+      {cat:'Forro', id:'02.15.02.01', nome:'Forro Vinílico'},
+    ]
+  },
+  {
+    id:'contrapiso', label:'02.16 · Contrapiso', servicos:[
+      {cat:'Contrapiso', id:'02.16.02.01', nome:'Contrapiso'},
+    ]
+  },
+  {
+    id:'pavimentacao', label:'02.16 · Pavimentação', servicos:[
+      {cat:'Pisos Cerâmicos / Porcelanatos', id:'02.16.03.01', nome:'Revestimento Cerâmico — Piso'},
+      {cat:'Pedras / Soleiras / Filetes', id:'02.16.07.01', nome:'Soleiras / Filetes'},
+      {cat:'Pedras / Soleiras / Filetes', id:'02.16.07.03', nome:'Peitoris'},
+    ]
+  },
+  {
+    id:'pintura', label:'02.17 · Pintura Interna', servicos:[
+      {cat:'Pintura Interna', id:'02.17.01.01', nome:'Massa PVA'},
+      {cat:'Pintura Interna', id:'02.17.01.02', nome:'Pintura Interna — 1ª Demão'},
+    ]
+  },
+];
+
+const PAVIMENTOS = [
+  'SS1','TÉR','1º PAV (G1)','2º PAV (G2)','3º PAV (LAZ)',
+  '4º PAV','5º PAV','6º PAV','7º PAV','8º PAV','9º PAV','10º PAV',
+  '11º PAV','12º PAV','13º PAV','14º PAV','15º PAV','16º PAV',
+  '17º PAV','18º PAV','19º PAV','20º PAV','21º PAV','22º PAV',
+  '23º PAV','24º PAV','25º PAV','26º PAV','27º PAV','ÁTICO'
+];
+
+const NUM_APTOS = 6;
+const PAV_GERAL = new Set(['SS1','TÉR','1º PAV (G1)','2º PAV (G2)','3º PAV (LAZ)']);
+const DISC_GERAL = new Set(['hidro','eletrica','inst-esp','rev-reboco','contrapiso']);
+const APTOS_DEF = ['Final 01','Final 02','Final 03','Final 04','Final 05','Final 06'];
+const SK = 'medicao_autoria_v3';
+
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+let state = {};
+let discAtiva = 'por-pavimento';
+
+function initState() {
+  const saved = localStorage.getItem(SK);
+  if (saved) { try { state = JSON.parse(saved); } catch(e){} }
+  DISCIPLINAS.forEach(d => {
+    if (!state[d.id]) state[d.id] = {};
+    PAVIMENTOS.forEach(pav => {
+      if (!state[d.id][pav]) state[d.id][pav] = { aptos: [...APTOS_DEF], vals: {} };
+      if (!state[d.id][pav].aptos) state[d.id][pav].aptos = [...APTOS_DEF];
+      d.servicos.forEach(s => {
+        const slots = isGeralMode(d.id, pav) ? 1 : NUM_APTOS;
+        if (!state[d.id][pav].vals[s.id]) state[d.id][pav].vals[s.id] = Array(slots).fill('');
+      });
+    });
+  });
+}
+
+
+// ═══════════════════════════════════════════════════════
+// INTEGRAÇÃO SHAREPOINT
+// ═══════════════════════════════════════════════════════
+const SP_CONFIG = {
+  siteId:   'd24cfcbd-0826-4284-8bc2-e14254c69adf',
+  siteUrl:  'https://omincbr.sharepoint.com/sites/PlanejamentoeControledeObras-OM',
+  listName: 'Medio Fsica Autoria  APP',
+  projeto:  'Autoria',
+};
+
+let spSyncStatus = 'idle'; // idle | syncing | error | ok
+let spItemCache = {}; // chaveUnica -> itemId do SharePoint
+let syncQueue = {}; // chaveUnica -> {disc,pav,sid,ai,val} — debounce
+let syncTimer = null;
+
+function spHeaders(extra = {}) {
+  return {
+    'Accept': 'application/json;odata=nometadata',
+    'Content-Type': 'application/json;odata=nometadata',
+    'X-RequestDigest': window._spPageContextInfo?.formDigestValue || '',
+    ...extra
+  };
+}
+
+function setStatus(s, msg) {
+  spSyncStatus = s;
+  const el = document.getElementById('save-lbl');
+  if (!el) return;
+  if (s === 'syncing') { el.textContent = '⟳ sincronizando...'; el.className = 'save-lbl'; }
+  if (s === 'ok')      { el.textContent = '✓ salvo no SharePoint · ' + new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); el.className = 'save-lbl ok'; }
+  if (s === 'offline') { el.textContent = '⚠ offline — salvo localmente'; el.className = 'save-lbl'; el.style.color='var(--mid)'; }
+  if (s === 'error')   { el.textContent = '✗ erro ao salvar — ' + (msg||''); el.className = 'save-lbl'; el.style.color='var(--low)'; }
+}
+
+// Verificar se está rodando dentro do SharePoint (tem cookie de auth)
+function isInSharePoint() {
+  return window.location.hostname.includes('sharepoint.com') || window.location.hostname.includes('omincbr');
+}
+
+// Buscar digest para operações de escrita
+async function getDigest() {
+  try {
+    const r = await fetch(SP_CONFIG.siteUrl + '/_api/contextinfo', {
+      method: 'POST',
+      headers: { 'Accept': 'application/json;odata=nometadata' },
+      credentials: 'include'
+    });
+    const d = await r.json();
+    return d.FormDigestValue || '';
+  } catch { return ''; }
+}
+
+// Carregar todos os itens da lista ao iniciar
+async function spLoadAll() {
+  if (!isInSharePoint()) { setStatus('offline'); return; }
+  setStatus('syncing');
+  try {
+    const url = SP_CONFIG.siteUrl +
+      `/_api/web/lists/getbytitle('${SP_CONFIG.listName}')/items` +
+      `?$filter=Projeto eq '${SP_CONFIG.projeto}'` +
+      `&$select=Id,Disciplina,Pavimento,ServicoId,FinalIdx,Valor,ChaveUnica,FinalNome` +
+      `&$top=5000`;
+    const r = await fetch(url, { headers: { 'Accept': 'application/json;odata=nometadata' }, credentials: 'include' });
+    if (!r.ok) throw new Error(r.status);
+    const data = await r.json();
+    const items = data.value || [];
+
+    // Popular state com dados do SharePoint
+    items.forEach(item => {
+      const disc = item.Disciplina;
+      const pav  = item.Pavimento;
+      const sid  = item.ServicoId;
+      const ai   = parseInt(item.FinalIdx) || 0;
+      const val  = item.Valor !== null && item.Valor !== undefined ? String(item.Valor) : '';
+      const chave = item.ChaveUnica;
+
+      if (state[disc] && state[disc][pav] && state[disc][pav].vals[sid] !== undefined) {
+        state[disc][pav].vals[sid][ai] = val;
+        spItemCache[chave] = item.Id;
+      }
+    });
+
+    // Atualizar UI
+    DISCIPLINAS.forEach(d => PAVIMENTOS.forEach(pav => updatePavHeader(d.id, pav)));
+    buildViewPavimento(PAVIMENTOS[5]);
+    updateSummary();
+    setStatus('ok');
+  } catch(e) {
+    console.error('SP load error:', e);
+    setStatus('offline');
+  }
+}
+
+// Salvar um único valor no SharePoint (upsert)
+async function spSaveItem(disc, pav, servId, ai, val) {
+  if (!isInSharePoint()) { saveState(); return; }
+  const chave = `${SP_CONFIG.projeto}|${disc}|${pav}|${servId}|${ai}`;
+  const digest = await getDigest();
+  const body = JSON.stringify({
+    Projeto:     SP_CONFIG.projeto,
+    Disciplina:  disc,
+    Pavimento:   pav,
+    ServicoId:   servId,
+    FinalIdx:    ai,
+    Valor:       val === '' ? null : parseFloat(val),
+    ChaveUnica:  chave,
+  });
+
+  const baseUrl = SP_CONFIG.siteUrl + `/_api/web/lists/getbytitle('${SP_CONFIG.listName}')/items`;
+
+  try {
+    if (spItemCache[chave]) {
+      // UPDATE
+      await fetch(`${baseUrl}(${spItemCache[chave]})`, {
+        method: 'POST',
+        headers: { ...spHeaders({'X-RequestDigest': digest}), 'X-HTTP-Method': 'MERGE', 'IF-MATCH': '*' },
+        body,
+        credentials: 'include'
+      });
+    } else {
+      // CREATE
+      const r = await fetch(baseUrl, {
+        method: 'POST',
+        headers: { ...spHeaders({'X-RequestDigest': digest}) },
+        body,
+        credentials: 'include'
+      });
+      if (r.ok) {
+        const created = await r.json();
+        spItemCache[chave] = created.Id || created.id;
+      }
+    }
+    saveState(); // backup local também
+    setStatus('ok');
+  } catch(e) {
+    console.error('SP save error:', e);
+    saveState();
+    setStatus('error', 'verifique conexão');
+  }
+}
+
+// Debounce: agrupa digitações rápidas antes de salvar
+function queueSync(disc, pav, servId, ai, val) {
+  const chave = `${disc}|${pav}|${servId}|${ai}`;
+  syncQueue[chave] = { disc, pav, servId, ai, val };
+  setStatus('syncing');
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(async () => {
+    const entries = Object.values(syncQueue);
+    syncQueue = {};
+    for (const e of entries) {
+      await spSaveItem(e.disc, e.pav, e.servId, e.ai, e.val);
+    }
+  }, 1200); // aguarda 1.2s após última digitação
+}
+
+function saveState() {
+  localStorage.setItem(SK, JSON.stringify(state));
+  const el = document.getElementById('save-lbl');
+  if (el) { el.textContent = 'salvo · ' + new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); el.classList.add('ok'); }
+}
+
+// ═══════════════════════════════════════════
+// CÁLCULOS
+// ═══════════════════════════════════════════
+function sid(s){ return s.replace(/[^a-zA-Z0-9]/g,'_'); }
+function isGeralMode(disc, pav){ return PAV_GERAL.has(pav) || DISC_GERAL.has(disc); }
+
+function getMedia(disc, pav, itemId) {
+  const raw = state[disc][pav].vals[itemId];
+  const divisor = isGeralMode(disc, pav) ? 1 : NUM_APTOS;
+  const hasAny = raw.some(v => v !== '' && v !== null && v !== undefined);
+  if (!hasAny) return null;
+  const soma = raw.reduce((a,v) => a + (parseFloat(v) || 0), 0);
+  return soma / divisor;
+}
+
+function getAvgPav(disc, pav) {
+  const d = DISCIPLINAS.find(x=>x.id===disc);
+  let soma=0, cnt=0;
+  d.servicos.forEach(s=>{ const m=getMedia(disc,pav,s.id); if(m!==null){soma+=m;cnt++;} });
+  return cnt ? soma/cnt : null;
+}
+
+function bClass(v) {
+  if(v===null||v===undefined) return 'b-na';
+  if(v>=90) return 'b-ok';
+  if(v>=40) return 'b-mid';
+  if(v>0)   return 'b-low';
+  return 'b-zero';
+}
+
+function pClass(v) {
+  if(!v||v===0) return 'pg-z';
+  if(v>=90) return 'pg-ok';
+  if(v>=40) return 'pg-mid';
+  return 'pg-low';
+}
+
+function fmt(v){ return v!==null ? Math.round(v)+'%' : '—'; }
+
+// ═══════════════════════════════════════════
+// DOM UPDATES
+// ═══════════════════════════════════════════
+function updatePavHeader(disc, pav) {
+  const k = sid(disc+'_'+pav);
+  const avg = getAvgPav(disc, pav);
+  const pct = avg!==null ? Math.round(avg) : null;
+  const pe = document.getElementById('prog_'+k);
+  const fe = document.getElementById('fill_'+k);
+  if(pe) pe.textContent = fmt(pct);
+  if(fe){ fe.style.width=(avg?Math.min(avg,100):0)+'%'; fe.className='pav-bf '+pClass(pct); }
+  // Atualizar também o header da disciplina na view por pavimento
+  const pvAvgEl = document.getElementById('pvavg_'+k);
+  const pvFillEl = document.getElementById('pvfill_'+k);
+  if(pvAvgEl) pvAvgEl.textContent = fmt(pct);
+  if(pvFillEl){ pvFillEl.style.width=(avg?Math.min(avg,100):0)+'%'; pvFillEl.className='pav-bf '+pClass(pct); }
+}
+
+function updateSummary() {
+  // Na view "Por Pavimento" usar todas as disciplinas; senão só a ativa
+  const discs = discAtiva === 'por-pavimento' ? DISCIPLINAS : [DISCIPLINAS.find(x=>x.id===discAtiva)].filter(Boolean);
+  if (!discs.length) return;
+  let soma=0,cnt=0,campos=0,pavLanc=0,totalCampos=0;
+  PAVIMENTOS.forEach(pav=>{
+    let pavTemDado = false;
+    discs.forEach(d=>{
+      totalCampos += d.servicos.length * NUM_APTOS;
+      d.servicos.forEach(s=>{
+        state[d.id][pav].vals[s.id].forEach(v=>{ if(v!==''&&v!=null){ campos++; pavTemDado=true; } });
+      });
+    });
+    // Média global do pavimento na aba ativa
+    if(discAtiva !== 'por-pavimento'){
+      const avg=getAvgPav(discAtiva,pav);
+      if(avg!==null){soma+=avg;cnt++;pavLanc++;}
+    } else if(pavTemDado) {
+      pavLanc++;
+    }
+  });
+  if(discAtiva !== 'por-pavimento'){
+    document.getElementById('sg').textContent = cnt ? Math.round(soma/cnt)+'%':'—';
+  } else {
+    document.getElementById('sg').textContent = '—';
+  }
+  document.getElementById('sp').textContent = pavLanc;
+  document.getElementById('sc').textContent = campos;
+  document.getElementById('sct').textContent = 'de '+totalCampos+' total';
+  document.getElementById('sd').textContent = new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})+' '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+}
+
+// ═══════════════════════════════════════════
+// EVENTS
+// ═══════════════════════════════════════════
+function onInput(disc, pav, itemId, ai, el) {
+  let v = el.value.replace(/[^\d.]/g,'');
+  if(v!==''&&parseFloat(v)>100) v='100';
+  el.value=v;
+  el.classList.toggle('hv',v!=='');
+  state[disc][pav].vals[itemId][ai]=v;
+  if(!isGeralMode(disc, pav)){
+    const k=sid(disc+'_'+pav);
+    const is=sid(itemId);
+    const me=document.getElementById('med_'+k+'_'+is);
+    const avg=getMedia(disc,pav,itemId);
+    const ar=avg!==null?Math.round(avg):null;
+    if(me){me.className='badge '+bClass(ar);me.textContent=fmt(ar);}
+  }
+  updatePavHeader(disc,pav);
+  updateSummary();
+  saveState(); // backup local
+  queueSync(disc, pav, itemId, ai, v); // sync SharePoint
+}
+
+function onAptoName(disc, pav, ai, el) {
+  state[disc][pav].aptos[ai]=el.value||APTOS_DEF[ai];
+  const k=sid(disc+'_'+pav);
+  const th=document.getElementById('th_'+k+'_'+ai);
+  if(th) th.textContent=state[disc][pav].aptos[ai];
+  saveState();
+}
+
+// ═══════════════════════════════════════════
+// BUILD TABLE
+// ═══════════════════════════════════════════
+function buildTable(disc, pav) {
+  const d=DISCIPLINAS.find(x=>x.id===disc);
+  const k=sid(disc+'_'+pav);
+  const isGeral=isGeralMode(disc, pav);
+  const aptos=state[disc][pav].aptos;
+  let h='<div class="tw"><table><thead><tr>';
+  h+='<th>Código</th><th>Serviço</th>';
+  if(isGeral){
+    h+='<th class="c">% Avanço</th>';
+  } else {
+    for(let i=0;i<NUM_APTOS;i++) h+=`<th class="c" id="th_${k}_${i}">${aptos[i]}</th>`;
+    h+='<th class="c">Média</th>';
+  }
+  h+='</tr></thead><tbody>';
+  let lastCat='';
+  d.servicos.forEach(s=>{
+    const cols=isGeral?3:NUM_APTOS+3;
+    if(s.cat!==lastCat){ h+=`<tr class="cat-row"><td colspan="${cols}">${s.cat}</td></tr>`; lastCat=s.cat; }
+    const avg=getMedia(disc,pav,s.id);
+    const ar=avg!==null?Math.round(avg):null;
+    const is=sid(s.id);
+    const dS=disc.replace(/'/g,"\\x27"); const pS=pav.replace(/'/g,"\\x27"); const iS=s.id.replace(/'/g,"\\x27");
+    h+=`<tr><td class="tc">${s.id}</td><td class="tn">${s.nome}</td>`;
+    if(isGeral){
+      const v=state[disc][pav].vals[s.id][0];
+      const hv=v!==''&&v!=null;
+      h+=`<td class="ti"><input class="pi${hv?' hv':''}" type="text" inputmode="decimal" maxlength="5" value="${v||''}" placeholder="—" oninput="onInput('${dS}','${pS}','${iS}',0,this)"></td>`;
+    } else {
+      for(let i=0;i<NUM_APTOS;i++){
+        const v=state[disc][pav].vals[s.id][i];
+        const hv=v!==''&&v!=null;
+        h+=`<td class="ti"><input class="pi${hv?' hv':''}" type="text" inputmode="decimal" maxlength="5" value="${v||''}" placeholder="—" oninput="onInput('${dS}','${pS}','${iS}',${i},this)"></td>`;
+      }
+      h+=`<td class="tm"><span class="badge ${bClass(ar)}" id="med_${k}_${is}">${fmt(ar)}</span></td>`;
+    }
+    h+='</tr>';
+  });
+  h+='</tbody></table></div>';
+  return h;
+}
+
+function buildAptoConfig(disc, pav) {
+  if(isGeralMode(disc, pav)) return '';
+  const k=sid(disc+'_'+pav);
+  const aptos=state[disc][pav].aptos;
+  const dS=disc.replace(/'/g,"\\x27");const pS=pav.replace(/'/g,"\\x27");
+  let h='<div class="apto-cfg"><span class="apto-cfg-lbl">Finais:</span>';
+  for(let i=0;i<NUM_APTOS;i++){
+    h+=`<input class="apto-inp" type="text" value="${aptos[i]}" maxlength="12" placeholder="Final ${i+1}" onchange="onAptoName('${dS}','${pS}',${i},this)">`;
+  }
+  h+='</div>';
+  return h;
+}
+
+// ═══════════════════════════════════════════
+// PAV TOGGLE
+// ═══════════════════════════════════════════
+function togglePav(disc, pav) {
+  const k=sid(disc+'_'+pav);
+  const block=document.getElementById('block_'+k);
+  const body=document.getElementById('body_'+k);
+  if(!body) return;
+  const isOpen=body.classList.contains('open');
+  if(!isOpen&&!body.dataset.built){ body.innerHTML=buildAptoConfig(disc,pav)+buildTable(disc,pav); body.dataset.built='1'; }
+  body.classList.toggle('open',!isOpen);
+  block.classList.toggle('open',!isOpen);
+}
+
+function expandAll() {
+  PAVIMENTOS.forEach(pav=>{
+    const k=sid(discAtiva+'_'+pav);
+    const block=document.getElementById('block_'+k);
+    const body=document.getElementById('body_'+k);
+    if(!body) return;
+    if(!body.dataset.built){ body.innerHTML=buildAptoConfig(discAtiva,pav)+buildTable(discAtiva,pav); body.dataset.built='1'; }
+    body.classList.add('open'); block.classList.add('open');
+  });
+}
+
+function collapseAll() {
+  PAVIMENTOS.forEach(pav=>{
+    const k=sid(discAtiva+'_'+pav);
+    document.getElementById('body_'+k)?.classList.remove('open');
+    document.getElementById('block_'+k)?.classList.remove('open');
+  });
+}
+
+function jumpTo(pav) {
+  if(!pav) return;
+  const k=sid(discAtiva+'_'+pav);
+  const block=document.getElementById('block_'+k);
+  const body=document.getElementById('body_'+k);
+  if(!body) return;
+  if(!body.dataset.built){ body.innerHTML=buildAptoConfig(discAtiva,pav)+buildTable(discAtiva,pav); body.dataset.built='1'; }
+  body.classList.add('open'); block.classList.add('open');
+  setTimeout(()=>block.scrollIntoView({behavior:'smooth',block:'start'}),50);
+}
+
+// ═══════════════════════════════════════════
+// DISCIPLINE SWITCH
+// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════
+// VIEW POR PAVIMENTO
+// ═══════════════════════════════════════════
+function buildViewPavimento(pav) {
+  const panel = document.getElementById('panel_por-pavimento');
+  if (!panel) return;
+  panel.innerHTML = '';
+
+  // Seletor de pavimento
+  const selWrap = document.createElement('div');
+  selWrap.className = 'pv-select';
+  selWrap.innerHTML = '<label>Pavimento:</label>';
+  const sel = document.createElement('select');
+  PAVIMENTOS.forEach(p => {
+    const o = document.createElement('option');
+    o.value = p; o.textContent = p;
+    if (p === pav) o.selected = true;
+    sel.appendChild(o);
+  });
+  sel.onchange = () => buildViewPavimento(sel.value);
+  selWrap.appendChild(sel);
+  panel.appendChild(selWrap);
+
+  // Uma seção por disciplina
+  DISCIPLINAS.forEach(d => {
+    const isG = isGeralMode(d.id, pav);
+    const aptos = state[d.id][pav].aptos;
+    const avgPav = getAvgPav(d.id, pav);
+    const ar = avgPav !== null ? Math.round(avgPav) : null;
+
+    const block = document.createElement('div');
+    block.className = 'pv-disc-block';
+
+    const pvK2 = sid(d.id+'_'+pav);
+    let hdr = `<div class="pv-disc-hdr">
+      <span class="pv-disc-label">${d.label}</span>
+      <div class="pav-bw" style="flex:1"><div class="pav-bf ${pClass(ar)}" id="pvfill_${pvK2}" style="width:${ar?Math.min(ar,100):0}%"></div></div>
+      <span class="pv-disc-avg" id="pvavg_${pvK2}">${fmt(ar)}</span>
+    </div>`;
+
+    let tbl = '<div class="tw"><table><thead><tr><th>Serviço</th>';
+    if (isG) {
+      tbl += '<th class="c">% Avanço</th>';
+    } else {
+      for (let i = 0; i < NUM_APTOS; i++) tbl += `<th class="c">${aptos[i]}</th>`;
+      tbl += '<th class="c">Média</th>';
+    }
+    tbl += '</tr></thead><tbody>';
+
+    let lastCat = '';
+    d.servicos.forEach(s => {
+      if (s.cat !== lastCat) {
+        const cols = isG ? 2 : NUM_APTOS + 2;
+        tbl += `<tr class="cat-row"><td colspan="${cols}">${s.cat}</td></tr>`;
+        lastCat = s.cat;
+      }
+      const avg = getMedia(d.id, pav, s.id);
+      const avgR = avg !== null ? Math.round(avg) : null;
+      const dS = d.id.replace(/'/g,"\x27"); const pS = pav.replace(/'/g,"\x27"); const iS = s.id.replace(/'/g,"\x27");
+      tbl += `<tr><td class="tn">${s.nome}</td>`;
+      if (isG) {
+        const v = state[d.id][pav].vals[s.id][0];
+        const hv = v !== '' && v != null;
+        tbl += `<td class="ti"><input class="pi${hv?' hv':''}" type="text" inputmode="decimal" maxlength="5" value="${v||''}" placeholder="—" oninput="onInput('${dS}','${pS}','${iS}',0,this)"></td>`;
+      } else {
+        for (let i = 0; i < NUM_APTOS; i++) {
+          const v = state[d.id][pav].vals[s.id][i];
+          const hv = v !== '' && v != null;
+          tbl += `<td class="ti"><input class="pi${hv?' hv':''}" type="text" inputmode="decimal" maxlength="5" value="${v||''}" placeholder="—" oninput="onInput('${dS}','${pS}','${iS}',${i},this)"></td>`;
+        }
+        const pvK=sid(d.id+'_'+pav); const pvIs=sid(s.id);
+        tbl += `<td class="tm"><span class="badge ${bClass(avgR)}" id="med_${pvK}_${pvIs}">${fmt(avgR)}</span></td>`;
+      }
+      tbl += '</tr>';
+    });
+    tbl += '</tbody></table></div>';
+    block.innerHTML = hdr + tbl;
+    panel.appendChild(block);
+  });
+}
+
+function setDisc(discId) {
+  discAtiva=discId;
+  document.querySelectorAll('.dtab').forEach(t=>t.classList.toggle('active',t.dataset.disc===discId));
+  document.querySelectorAll('.disc-panel').forEach(p=>p.classList.toggle('active',p.id==='panel_'+discId));
+  if(discId==='por-pavimento') buildViewPavimento(PAVIMENTOS[5]);
+  else updateSummary();
+}
+
+// ═══════════════════════════════════════════
+// EXPORT CSV
+// ═══════════════════════════════════════════
+function exportCSV() {
+  // Se estiver na view "Por Pavimento", exporta todas as disciplinas juntas
+  const discsParaExportar = discAtiva === 'por-pavimento' ? DISCIPLINAS : [DISCIPLINAS.find(x=>x.id===discAtiva)];
+
+  // Montar cabeçalho: Pavimento | Disciplina — Serviço | ...
+  const header = ['Pavimento'];
+  discsParaExportar.forEach(d => {
+    d.servicos.forEach(s => header.push(d.label.split(' · ')[1] + ' — ' + s.nome));
+  });
+
+  const rows = [header];
+  PAVIMENTOS.forEach(pav => {
+    const row = [pav];
+    discsParaExportar.forEach(d => {
+      const isG = isGeralMode(d.id, pav);
+      d.servicos.forEach(s => {
+        if (isG) {
+          const v = state[d.id][pav].vals[s.id][0];
+          row.push(v !== '' && v != null ? v : '');
+        } else {
+          const avg = getMedia(d.id, pav, s.id);
+          row.push(avg !== null ? Math.round(avg) : '');
+        }
+      });
+    });
+    rows.push(row);
+  });
+
+  const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob(['\uFEFF' + csv], {type: 'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const nome = discAtiva === 'por-pavimento' ? 'todas-disciplinas' : discAtiva;
+  a.download = 'medicao_' + nome + '_autoria_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+function init() {
+  initState();
+  const discBar=document.getElementById('disc-bar');
+  const mainEl=document.getElementById('main');
+  const jumpSel=document.getElementById('pav-jump');
+
+  PAVIMENTOS.forEach(pav=>{
+    const opt=document.createElement('option');
+    opt.value=pav;opt.textContent=pav;
+    jumpSel.appendChild(opt);
+  });
+
+  // Aba "Por Pavimento" — primeira posição
+  const tabPv = document.createElement('button');
+  tabPv.className = 'dtab active';
+  tabPv.dataset.disc = 'por-pavimento';
+  tabPv.textContent = '⊞ Por Pavimento';
+  tabPv.onclick = () => setDisc('por-pavimento');
+  discBar.appendChild(tabPv);
+
+  const panelPv = document.createElement('div');
+  panelPv.className = 'disc-panel active';
+  panelPv.id = 'panel_por-pavimento';
+  mainEl.appendChild(panelPv);
+
+  DISCIPLINAS.forEach((d,di)=>{
+    // Tab
+    const tab=document.createElement('button');
+    tab.className='dtab';
+    tab.dataset.disc=d.id;
+    tab.textContent=d.label;
+    tab.onclick=()=>setDisc(d.id);
+    discBar.appendChild(tab);
+
+    // Panel
+    const panel=document.createElement('div');
+    panel.className='disc-panel'+(di===0?' active':'');
+    panel.id='panel_'+d.id;
+
+    PAVIMENTOS.forEach((pav,pi)=>{
+      const k=sid(d.id+'_'+pav);
+      const block=document.createElement('div');
+      block.className='pav-block';
+      block.id='block_'+k;
+      block.innerHTML=`
+        <div class="pav-hdr" onclick="togglePav('${d.id.replace(/'/g,"\\'")}','${pav.replace(/'/g,"\\'")}')">
+          <span class="pav-num">${String(pi+1).padStart(2,'0')}</span>
+          <span class="pav-nm">${pav}</span>
+          <div class="pav-bw"><div class="pav-bf pg-z" id="fill_${k}" style="width:0%"></div></div>
+          <span class="pav-pct" id="prog_${k}">—</span>
+          <span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </div>
+        <div class="pav-body" id="body_${k}"></div>`;
+      panel.appendChild(block);
+    });
+    mainEl.appendChild(panel);
+  });
+
+  buildViewPavimento(PAVIMENTOS[5]);
+  updateSummary();
+  // Carregar dados do SharePoint (quando aberto pelo SP)
+  spLoadAll();
+}
+
+init();
+
+
+
+
+// ── DRAG SCROLL nas abas ──────────────────────────────
+(function(){
+  const bar = document.getElementById('disc-bar');
+  let isDragging = false, startX = 0, scrollStart = 0, moved = false;
+
+  bar.addEventListener('mousedown', e => {
+    isDragging = true;
+    moved = false;
+    startX = e.pageX - bar.offsetLeft;
+    scrollStart = bar.scrollLeft;
+    bar.style.cursor = 'grabbing';
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (!isDragging) return;
+    const x = e.pageX - bar.offsetLeft;
+    const delta = x - startX;
+    if (Math.abs(delta) > 4) moved = true;
+    bar.scrollLeft = scrollStart - delta;
+  });
+
+  document.addEventListener('mouseup', () => {
+    isDragging = false;
+    bar.style.cursor = 'grab';
+  });
+
+  // Impede clique na aba se foi drag
+  bar.addEventListener('click', e => {
+    if (moved) { e.stopPropagation(); e.preventDefault(); moved = false; }
+  }, true);
+
+  // Touch (mobile)
+  bar.addEventListener('touchstart', e => {
+    startX = e.touches[0].pageX - bar.offsetLeft;
+    scrollStart = bar.scrollLeft;
+  }, {passive:true});
+
+  bar.addEventListener('touchmove', e => {
+    const x = e.touches[0].pageX - bar.offsetLeft;
+    bar.scrollLeft = scrollStart - (x - startX);
+  }, {passive:true});
+})();
+</script>
+</body>
+</html>
