@@ -2,248 +2,565 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a0d10">
 <title>Medição Física — Autoria by Ornare</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0a0d10;--sf:#111518;--sf2:#181d22;--sf3:#1f262d;--bd:rgba(0,180,255,.12);--bd2:rgba(0,180,255,.22);--tx:#ffffff;--tx2:#b8c8d8;--tx3:#6a8090;--ac:#00b4ff;--ac-d:rgba(0,180,255,.12);--ok:#4ade80;--ok-b:rgba(74,222,128,.12);--mid:#fbbf24;--mid-b:rgba(251,191,36,.12);--low:#f87171;--low-b:rgba(248,113,113,.12);--r:8px;--rl:12px}
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--tx);font-family:'Syne',sans-serif;font-size:14px;min-height:100vh}
-/* HEADER */
-.app-hdr{background:var(--sf);border-bottom:1px solid var(--bd);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:54px;position:sticky;top:0;z-index:200}
-.hdr-l{display:flex;align-items:center;gap:12px}
-.hdr-logo{font-size:14px;font-weight:700;letter-spacing:.12em;color:var(--ac);text-transform:uppercase;font-family:'DM Mono',monospace}
-.hdr-sep{width:1px;height:20px;background:var(--bd2)}
-.hdr-ttl{font-size:13px;color:var(--tx)}
-/* DISCIPLINE TABS */
-.disc-bar{background:var(--sf);border-bottom:1px solid var(--bd);padding:0 24px;display:flex;gap:0;overflow-x:auto;position:sticky;top:54px;z-index:190;cursor:grab;user-select:none;-webkit-user-select:none}
-.disc-bar::-webkit-scrollbar{height:3px}
-.disc-bar::-webkit-scrollbar-thumb{background:var(--sf3);border-radius:2px}
-.dtab{padding:10px 16px;font-size:12px;font-weight:600;color:var(--tx2);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:color .15s,border-color .15s;background:none;border-top:none;border-left:none;border-right:none;font-family:'Syne',sans-serif}
+:root{
+  --bg:#0a0d10;--sf:#11161b;--sf2:#171d23;--sf3:#1f262d;--sf4:#2a333c;
+  --bd:rgba(120,180,220,.10);--bd2:rgba(120,180,220,.18);--bd3:rgba(120,180,220,.30);
+  --tx:#ffffff;--tx2:#b8c8d8;--tx3:#7a8a9a;--tx4:#4a5560;
+  --ac:#00b4ff;--ac-d:#0094d9;--ac-w:rgba(0,180,255,.10);
+  --ok:#4ade80;--ok-w:rgba(74,222,128,.10);
+  --mid:#fbbf24;--mid-w:rgba(251,191,36,.10);
+  --low:#f87171;--low-w:rgba(248,113,113,.10);
+  --r:6px;--rl:10px;--rxl:14px;
+  --h-top:56px;--h-tabs:46px;--h-pav:64px;
+  --safe-t:env(safe-area-inset-top,0);
+  --safe-b:env(safe-area-inset-bottom,0);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg);color:var(--tx);font-family:'Syne',sans-serif;font-size:15px;min-height:100vh;overscroll-behavior-y:none}
+body{padding-bottom:calc(40px + var(--safe-b))}
+button{font-family:inherit;color:inherit;background:none;border:none;cursor:pointer}
+input,select{font-family:inherit}
+
+/* ──────── TOPBAR ──────── */
+.topbar{
+  background:var(--sf);border-bottom:1px solid var(--bd);
+  padding:0 16px;padding-top:var(--safe-t);
+  display:flex;align-items:center;gap:12px;height:calc(var(--h-top) + var(--safe-t));
+  position:sticky;top:0;z-index:300;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+}
+.brand{font-size:13px;font-weight:700;letter-spacing:.14em;color:var(--ac);text-transform:uppercase;font-family:'DM Mono',monospace;display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+.brand em{font-style:normal;font-weight:400;letter-spacing:.04em;color:var(--tx2);font-family:'Syne',sans-serif;font-size:11px;text-transform:none;letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand .sep{display:none}
+@media(min-width:720px){
+  .brand .sep{display:inline-block;width:1px;height:18px;background:var(--bd2)}
+  .brand em{font-size:13px}
+}
+
+.sync-pill{
+  display:flex;align-items:center;gap:7px;
+  padding:5px 11px;border-radius:99px;
+  background:var(--sf3);border:1px solid var(--bd2);
+  font-size:11px;color:var(--tx2);font-family:'DM Mono',monospace;
+  white-space:nowrap;transition:all .2s
+}
+.sync-pill .dot{width:7px;height:7px;border-radius:99px;background:var(--tx3);flex-shrink:0;box-shadow:0 0 0 0 rgba(0,180,255,0)}
+.sync-pill.s-ok{color:var(--ok);border-color:rgba(74,222,128,.30);background:var(--ok-w)}
+.sync-pill.s-ok .dot{background:var(--ok);box-shadow:0 0 8px rgba(74,222,128,.5)}
+.sync-pill.s-sync{color:var(--ac);border-color:rgba(0,180,255,.30);background:var(--ac-w)}
+.sync-pill.s-sync .dot{background:var(--ac);animation:pulse 1.2s infinite}
+.sync-pill.s-err{color:var(--low);border-color:rgba(248,113,113,.30);background:var(--low-w)}
+.sync-pill.s-err .dot{background:var(--low)}
+.sync-pill.s-recv{color:var(--mid);border-color:rgba(251,191,36,.30);background:var(--mid-w)}
+.sync-pill.s-recv .dot{background:var(--mid)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+.menu-btn{
+  width:38px;height:38px;border-radius:var(--r);
+  background:var(--sf3);border:1px solid var(--bd2);
+  display:flex;align-items:center;justify-content:center;color:var(--tx2);
+}
+.menu-btn:hover{color:var(--tx);border-color:var(--bd3)}
+
+/* ──────── DISCIPLINE TABS ──────── */
+.disc-tabs{
+  background:var(--sf);border-bottom:1px solid var(--bd);
+  display:flex;gap:0;overflow-x:auto;overflow-y:hidden;
+  position:sticky;top:calc(var(--h-top) + var(--safe-t));z-index:280;
+  scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;
+  cursor:grab;user-select:none;-webkit-user-select:none;
+  scrollbar-width:none;
+  height:var(--h-tabs)
+}
+.disc-tabs::-webkit-scrollbar{display:none}
+.disc-tabs.dragging{cursor:grabbing}
+.dtab{
+  flex-shrink:0;padding:0 16px;height:100%;
+  font-size:12px;font-weight:600;color:var(--tx3);
+  display:flex;align-items:center;gap:7px;
+  border-bottom:2px solid transparent;white-space:nowrap;
+  transition:color .15s;scroll-snap-align:start;
+  letter-spacing:.01em
+}
+.dtab .dtab-code{font-family:'DM Mono',monospace;font-size:10px;color:var(--tx4);font-weight:500}
+.dtab.active .dtab-code{color:var(--ac)}
 .dtab:hover{color:var(--tx2)}
 .dtab.active{color:var(--ac);border-bottom-color:var(--ac)}
-/* TOOLBAR */
-.toolbar{background:var(--sf2);border-bottom:1px solid var(--bd);padding:8px 24px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.tlbl{font-size:10px;color:var(--tx2);text-transform:uppercase;letter-spacing:.06em}
-select,.btn{background:var(--sf3);border:1px solid var(--bd2);color:var(--tx);font-family:'Syne',sans-serif;font-size:12px;padding:5px 11px;border-radius:var(--r);cursor:pointer;outline:none;transition:border-color .15s}
-select:hover,.btn:hover{border-color:rgba(255,255,255,.25)}
+.dtab.tab-overview{color:var(--tx);background:var(--sf2)}
+.dtab.tab-overview.active{background:var(--sf2);color:var(--ac)}
+.dtab.tab-overview svg{width:14px;height:14px}
+
+/* ──────── PAVIMENTO NAV (sticky, only on Por Pavimento view) ──────── */
+.pav-nav{
+  background:var(--sf2);border-bottom:1px solid var(--bd);
+  position:sticky;top:calc(var(--h-top) + var(--h-tabs) + var(--safe-t));z-index:270;
+  display:none;flex-direction:column;
+}
+.pav-nav.active{display:flex}
+.pav-nav-row{
+  display:flex;align-items:center;gap:6px;
+  padding:8px 10px;height:var(--h-pav);
+}
+.pav-arrow{
+  width:42px;height:42px;border-radius:var(--r);
+  background:var(--sf3);border:1px solid var(--bd2);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--tx);font-size:20px;font-family:'DM Mono',monospace;
+  flex-shrink:0;transition:all .15s
+}
+.pav-arrow:hover{border-color:var(--bd3);background:var(--sf4)}
+.pav-arrow:active{transform:scale(.96)}
+.pav-arrow:disabled{opacity:.3;cursor:not-allowed}
+.pav-current{
+  flex:1;text-align:center;padding:0 4px;min-width:0;cursor:pointer;
+  display:flex;flex-direction:column;justify-content:center;align-items:center
+}
+.pav-current-label{
+  font-size:17px;font-weight:700;color:var(--tx);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  display:flex;align-items:center;gap:6px;line-height:1.1
+}
+.pav-current-label svg{width:13px;height:13px;color:var(--tx3)}
+.pav-current-sub{
+  font-size:10px;color:var(--tx3);font-family:'DM Mono',monospace;
+  margin-top:2px;letter-spacing:.04em;display:flex;align-items:center;gap:8px;justify-content:center
+}
+.pav-current-sub .sep-dot{width:3px;height:3px;border-radius:99px;background:var(--tx4)}
+.pav-current-sub b{color:var(--ac);font-weight:500}
+
+/* horizontal chip strip (collapsible) */
+.pav-chips{
+  display:flex;gap:6px;padding:0 10px 10px;overflow-x:auto;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none;
+  scroll-snap-type:x proximity
+}
+.pav-chips::-webkit-scrollbar{display:none}
+.pav-chip{
+  flex-shrink:0;padding:6px 12px;border-radius:99px;
+  background:var(--sf3);border:1px solid var(--bd2);
+  font-size:11px;font-weight:600;color:var(--tx2);
+  display:flex;align-items:center;gap:6px;
+  scroll-snap-align:start;transition:all .15s;cursor:pointer;
+  font-family:'DM Mono',monospace;letter-spacing:.02em
+}
+.pav-chip .chip-pct{font-size:10px;color:var(--tx4);font-weight:400}
+.pav-chip:hover{border-color:var(--bd3)}
+.pav-chip.active{background:var(--ac);color:#0a0d10;border-color:var(--ac)}
+.pav-chip.active .chip-pct{color:rgba(10,13,16,.65)}
+.pav-chip .chip-bar{width:24px;height:2px;border-radius:99px;background:rgba(255,255,255,.10);overflow:hidden}
+.pav-chip .chip-bar i{display:block;height:100%;background:var(--ac);transition:width .3s}
+.pav-chip.active .chip-bar{background:rgba(10,13,16,.20)}
+.pav-chip.active .chip-bar i{background:#0a0d10}
+
+/* ──────── SUMMARY ──────── */
+.summary{
+  display:grid;grid-template-columns:1fr 1fr;gap:1px;
+  background:var(--bd);border-bottom:1px solid var(--bd);
+}
+@media(min-width:720px){.summary{grid-template-columns:repeat(4,1fr)}}
+.sum-card{background:var(--sf);padding:12px 16px}
+.sum-card .sl{font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.10em;font-weight:600;margin-bottom:4px}
+.sum-card .sv{font-size:22px;font-weight:700;color:var(--ac);font-family:'DM Mono',monospace;line-height:1}
+.sum-card .sv.muted{font-size:13px;font-weight:500;color:var(--tx);padding-top:5px}
+.sum-card .ss{font-size:10px;color:var(--tx3);margin-top:4px;font-family:'DM Mono',monospace}
+
+/* ──────── TOOLBAR ──────── */
+.toolbar{
+  background:var(--sf);border-bottom:1px solid var(--bd);
+  padding:10px 14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap
+}
+.toolbar .spacer{flex:1}
+.btn{
+  background:var(--sf3);border:1px solid var(--bd2);color:var(--tx);
+  font-size:12px;font-weight:600;padding:8px 14px;border-radius:var(--r);
+  display:inline-flex;align-items:center;gap:6px;transition:all .15s;
+  min-height:38px;letter-spacing:.01em
+}
+.btn:hover{border-color:var(--bd3)}
+.btn:active{transform:scale(.97)}
+.btn svg{width:14px;height:14px}
+.btn-ghost{background:transparent;border-color:transparent;color:var(--tx2);padding:6px 10px}
+.btn-ghost:hover{color:var(--tx);background:var(--sf3)}
 .btn-ac{background:var(--ac);color:#0a0d10;border-color:var(--ac);font-weight:700}
-.btn-ac:hover{background:#33c4ff}
-.spacer{flex:1}
-.save-lbl{font-size:10px;color:var(--tx2);font-family:'DM Mono',monospace}
-.save-lbl.ok{color:var(--ok)}
-/* SUMMARY */
-.sum-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--bd);border-bottom:1px solid var(--bd)}
-.sum-card{background:var(--sf);padding:12px 20px}
-.sum-card .sl{font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px}
-.sum-card .sv{font-size:20px;font-weight:700;color:var(--ac);font-family:'DM Mono',monospace}
-.sum-card .ss{font-size:11px;color:var(--tx3);margin-top:2px}
-/* MAIN */
-.main{padding:16px 24px;padding-bottom:40px}
-.disc-panel{display:none}
-.disc-panel.active{display:block}
-/* PAV BLOCK */
-.pav-block{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rl);margin-bottom:5px;overflow:hidden;transition:border-color .2s}
-.pav-block:hover{border-color:var(--bd2)}
-.pav-block.open{border-color:var(--bd2)}
-.pav-hdr{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;user-select:none;transition:background .15s}
-.pav-hdr:hover{background:var(--sf2)}
-.pav-num{font-family:'DM Mono',monospace;font-size:10px;color:var(--tx2);width:22px;text-align:center;flex-shrink:0}
-.pav-nm{font-size:13px;font-weight:600;flex:0 0 135px;white-space:nowrap}
-.pav-bw{flex:1;height:4px;background:var(--sf3);border-radius:2px;overflow:hidden}
-.pav-bf{height:100%;border-radius:2px;transition:width .4s,background .3s}
-.pav-pct{font-family:'DM Mono',monospace;font-size:11px;color:var(--tx);width:38px;text-align:right;flex-shrink:0}
-.chev{width:14px;height:14px;color:var(--tx3);flex-shrink:0;transition:transform .2s;display:flex;align-items:center;justify-content:center}
-.open .chev{transform:rotate(180deg)}
-/* PAV BODY */
-.pav-body{display:none;border-top:1px solid var(--bd)}
-.pav-body.open{display:block}
-/* APTO CONFIG */
-.apto-cfg{padding:8px 16px;display:flex;align-items:center;gap:6px;background:var(--sf2);border-bottom:1px solid var(--bd);flex-wrap:wrap}
-.apto-cfg-lbl{font-size:10px;color:var(--tx2);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
-.apto-inp{background:var(--sf3);border:1px solid var(--bd2);color:var(--tx);font-family:'DM Mono',monospace;font-size:11px;padding:3px 6px;border-radius:5px;width:75px;outline:none;transition:border-color .15s;text-align:center}
-.apto-inp:focus{border-color:var(--ac);box-shadow:0 0 0 1px rgba(0,180,255,.2)}
-/* TABLE */
-.tw{overflow-x:auto}
-table{width:100%;border-collapse:collapse;min-width:580px}
-thead th{font-size:10px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.06em;padding:7px 10px;text-align:left;border-bottom:1px solid var(--bd);white-space:nowrap;background:var(--sf2)}
-thead th.c{text-align:center}
-.cat-row td{background:var(--sf2);font-size:10px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.06em;padding:5px 10px;border-bottom:1px solid var(--bd)}
-tbody tr{transition:background .1s}
-tbody tr:not(.cat-row):hover td{background:var(--sf2)}
-td{padding:4px 10px;border-bottom:1px solid var(--bd);vertical-align:middle}
-tbody tr:last-child td{border-bottom:none}
-.tc{font-family:'DM Mono',monospace;font-size:10px;color:var(--tx2);white-space:nowrap;width:96px}
-.tn{font-size:12px;color:var(--tx);max-width:240px}
-.ti{text-align:center;width:64px}
-.tm{text-align:center;width:64px}
-.pi{background:var(--sf3);border:1px solid var(--bd2);color:var(--tx);font-family:'DM Mono',monospace;font-size:12px;padding:3px 0;border-radius:5px;width:50px;text-align:center;outline:none;transition:border-color .15s,background .15s}
-.pi:focus{border-color:var(--ac);background:var(--sf);box-shadow:0 0 0 1px rgba(0,180,255,.2)}
-.pi.hv{color:var(--ac);border-color:rgba(0,180,255,.3)}
+.btn-ac:hover{background:#33c4ff;border-color:#33c4ff}
+
+/* ──────── MAIN ──────── */
+.main{padding:14px;padding-bottom:60px;max-width:1400px;margin:0 auto}
+@media(min-width:720px){.main{padding:18px 24px}}
+
+.view{display:none}
+.view.active{display:block}
+
+/* ─── VIEW: Por Pavimento ─── */
+.disc-section{
+  background:var(--sf);border:1px solid var(--bd);border-radius:var(--rxl);
+  margin-bottom:10px;transition:border-color .2s
+}
+.disc-section.open{border-color:var(--bd2)}
+.disc-section-hdr{
+  display:flex;align-items:center;gap:10px;padding:14px 16px;
+  cursor:pointer;user-select:none;background:var(--sf);
+  border-radius:var(--rxl);
+  transition:background .15s;position:sticky;top:calc(var(--h-top) + var(--h-tabs) + var(--h-pav) + var(--safe-t));z-index:50
+}
+.disc-section-hdr:hover{background:var(--sf2)}
+.disc-section .disc-section-hdr{background:var(--sf)}
+.disc-section.open .disc-section-hdr{background:var(--sf2);border-bottom:1px solid var(--bd);border-radius:var(--rxl) var(--rxl) 0 0}
+.disc-section-code{font-family:'DM Mono',monospace;font-size:10px;color:var(--tx3);font-weight:500;letter-spacing:.04em}
+.disc-section-label{font-size:14px;font-weight:700;color:var(--tx);flex:1;line-height:1.2;display:flex;flex-direction:column;gap:1px;min-width:0}
+.disc-section-bar{flex:0 0 80px;height:5px;background:var(--sf3);border-radius:99px;overflow:hidden}
+@media(min-width:720px){.disc-section-bar{flex:0 0 160px}}
+.disc-section-bar i{display:block;height:100%;border-radius:99px;background:var(--sf3);transition:width .4s,background .3s}
+.disc-section-avg{
+  font-family:'DM Mono',monospace;font-size:13px;font-weight:500;
+  color:var(--tx);min-width:42px;text-align:right;flex-shrink:0
+}
+.disc-section-chev{width:18px;height:18px;color:var(--tx3);transition:transform .25s;flex-shrink:0}
+.disc-section.open .disc-section-chev{transform:rotate(180deg)}
+
+.disc-section-body{display:none;padding:6px 6px 10px;background:var(--bg);border-radius:0 0 var(--rxl) var(--rxl)}
+.disc-section.open .disc-section-body{display:block}
+
+/* SERVICE CARD */
+.srv{
+  background:var(--sf);border:1px solid var(--bd);border-radius:var(--rl);
+  margin:6px;padding:12px 14px;transition:border-color .15s
+}
+.srv:hover{border-color:var(--bd2)}
+.srv-hdr{display:flex;align-items:flex-start;gap:8px;margin-bottom:10px}
+.srv-name{flex:1;font-size:14px;font-weight:500;color:var(--tx);line-height:1.3;letter-spacing:-.005em;min-width:0;text-wrap:pretty}
+.srv-code{font-family:'DM Mono',monospace;font-size:10px;color:var(--tx4);margin-top:3px;display:block;letter-spacing:.04em}
+.srv-cat{font-family:'DM Mono',monospace;font-size:9px;color:var(--ac);text-transform:uppercase;letter-spacing:.08em;font-weight:500;margin-bottom:2px}
+.srv-avg-wrap{flex-shrink:0;text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.srv-avg-lbl{font-size:9px;color:var(--tx4);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+
+/* INPUT GRID */
+.in-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.in-grid.geral{grid-template-columns:1fr;max-width:200px}
+.in-cell{display:flex;flex-direction:column;gap:4px}
+.in-cell label{
+  font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;
+  font-weight:600;text-align:center;line-height:1;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  font-family:'DM Mono',monospace
+}
+.in-grid.geral label{font-size:11px;text-align:left;color:var(--ac);letter-spacing:.1em}
+.pi{
+  background:var(--sf3);border:1px solid var(--bd2);color:var(--tx);
+  font-family:'DM Mono',monospace;font-size:16px;font-weight:500;
+  padding:0;border-radius:var(--r);width:100%;height:44px;
+  text-align:center;outline:none;
+  transition:border-color .15s,background .15s,color .15s
+}
+.in-grid.geral .pi{height:50px;font-size:20px;font-weight:600}
+.pi::placeholder{color:var(--tx4);font-weight:400}
+.pi:hover{border-color:var(--bd3)}
+.pi:focus{border-color:var(--ac);background:var(--sf);box-shadow:0 0 0 2px rgba(0,180,255,.15)}
+.pi.hv{color:var(--ac);border-color:rgba(0,180,255,.30);background:rgba(0,180,255,.05)}
+.pi.recv-flash{animation:recv .8s ease-out}
+@keyframes recv{0%{background:var(--mid-w);border-color:var(--mid)}100%{background:var(--sf3)}}
+
 /* BADGES */
-.badge{display:inline-block;font-family:'DM Mono',monospace;font-size:11px;font-weight:500;padding:2px 7px;border-radius:4px;min-width:42px;text-align:center}
-.b-ok{background:var(--ok-b);color:var(--ok)}
-.b-mid{background:var(--mid-b);color:var(--mid)}
-.b-low{background:var(--low-b);color:var(--low)}
-.b-zero{background:rgba(255,255,255,.04);color:#444}
-.b-na{background:transparent;color:var(--tx3)}
-/* PROG COLORS */
-.pg-ok{background:var(--ok)}
-.pg-mid{background:var(--mid)}
-.pg-low{background:var(--low)}
-.pg-z{background:var(--sf3)}
-/* VIEW POR PAVIMENTO */
-.pv-select{display:flex;align-items:center;gap:10px;margin-bottom:1rem;flex-wrap:wrap}
-.pv-select label{font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em}
-.pv-disc-block{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rl);margin-bottom:5px;overflow:hidden}
-.pv-disc-hdr{display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--sf2);border-bottom:1px solid var(--bd)}
-.pv-disc-label{font-size:12px;font-weight:600;color:var(--ac);flex:0 0 200px;white-space:nowrap;font-family:'DM Mono',monospace;letter-spacing:.02em}
-.pv-disc-avg{font-family:'DM Mono',monospace;font-size:12px;color:var(--tx);margin-left:auto}
-/* SCROLLBAR */
-::-webkit-scrollbar{width:5px;height:5px}
-::-webkit-scrollbar-track{background:var(--bg)}
-::-webkit-scrollbar-thumb{background:var(--sf3);border-radius:3px}
-@media(max-width:600px){.app-hdr,.main,.toolbar{padding-left:12px;padding-right:12px}.sum-strip{grid-template-columns:repeat(2,1fr)}.disc-bar{padding:0 12px}}
+.badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  font-family:'DM Mono',monospace;font-size:12px;font-weight:600;
+  padding:4px 10px;border-radius:99px;min-width:50px;height:24px;
+  letter-spacing:.02em
+}
+.b-ok{background:var(--ok-w);color:var(--ok)}
+.b-mid{background:var(--mid-w);color:var(--mid)}
+.b-low{background:var(--low-w);color:var(--low)}
+.b-zero{background:rgba(255,255,255,.04);color:var(--tx4)}
+.b-na{background:transparent;color:var(--tx4);border:1px dashed var(--bd2)}
+
+/* PROGRESS COLORS */
+.pg-ok{background:var(--ok)!important}
+.pg-mid{background:var(--mid)!important}
+.pg-low{background:var(--low)!important}
+.pg-z{background:var(--sf3)!important}
+
+/* APTO config — collapsible */
+.aptos-cfg{
+  margin:6px;padding:10px 12px;background:var(--sf);
+  border:1px solid var(--bd);border-radius:var(--rl);
+  display:none;
+}
+.aptos-cfg.open{display:block}
+.aptos-cfg-hdr{
+  display:flex;align-items:center;gap:6px;
+  font-size:10px;color:var(--tx3);text-transform:uppercase;
+  letter-spacing:.07em;font-weight:600;margin-bottom:8px
+}
+.aptos-cfg-inputs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+@media(min-width:720px){.aptos-cfg-inputs{grid-template-columns:repeat(6,1fr)}}
+.apto-inp{
+  background:var(--sf3);border:1px solid var(--bd2);color:var(--tx);
+  font-size:12px;padding:8px 10px;border-radius:var(--r);width:100%;
+  outline:none;text-align:center;font-family:'DM Mono',monospace
+}
+.apto-inp:focus{border-color:var(--ac)}
+.aptos-toggle{
+  margin:0 6px 6px;padding:8px 12px;display:flex;align-items:center;gap:6px;
+  font-size:10px;color:var(--tx3);text-transform:uppercase;
+  letter-spacing:.07em;font-weight:600;cursor:pointer;user-select:none;
+  transition:color .15s
+}
+.aptos-toggle:hover{color:var(--tx2)}
+
+/* ─── VIEW: Por Disciplina ─── */
+.pav-block{
+  background:var(--sf);border:1px solid var(--bd);border-radius:var(--rxl);
+  margin-bottom:8px;transition:border-color .2s
+}
+.pav-block.open{border-color:var(--bd2)}
+.pav-hdr{
+  display:flex;align-items:center;gap:10px;padding:13px 16px;
+  cursor:pointer;user-select:none;transition:background .15s
+}
+.pav-hdr{border-radius:var(--rxl)}
+.pav-hdr:hover{background:var(--sf2)}
+.pav-block.open .pav-hdr{background:var(--sf2);border-bottom:1px solid var(--bd);border-radius:var(--rxl) var(--rxl) 0 0}
+.pav-num{
+  font-family:'DM Mono',monospace;font-size:10px;color:var(--tx4);
+  width:18px;text-align:left;flex-shrink:0;font-weight:500
+}
+.pav-nm{font-size:14px;font-weight:600;color:var(--tx);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pav-bw{flex:0 0 60px;height:5px;background:var(--sf3);border-radius:99px;overflow:hidden}
+@media(min-width:720px){.pav-bw{flex:0 0 140px}}
+.pav-bf{display:block;height:100%;border-radius:99px;background:var(--sf3);transition:width .4s,background .3s}
+.pav-pct{
+  font-family:'DM Mono',monospace;font-size:13px;font-weight:500;
+  color:var(--tx);min-width:42px;text-align:right;flex-shrink:0
+}
+.chev{width:16px;height:16px;color:var(--tx3);flex-shrink:0;transition:transform .25s}
+.pav-block.open .chev{transform:rotate(180deg)}
+.pav-body{display:none;background:var(--bg);padding:6px 6px 10px;border-radius:0 0 var(--rxl) var(--rxl)}
+.pav-block.open .pav-body{display:block}
+
+/* ─── EMPTY STATE ─── */
+.empty{
+  text-align:center;padding:60px 20px;color:var(--tx3);
+  font-size:13px;line-height:1.6
+}
+.empty svg{width:48px;height:48px;color:var(--tx4);margin:0 auto 14px;display:block}
+
+/* ─── MOBILE TWEAKS ─── */
+@media(max-width:520px){
+  .srv-name{font-size:13px}
+  .in-grid{gap:5px}
+  .pi{font-size:15px;height:42px}
+  .in-cell label{font-size:8px}
+}
+@media(max-width:380px){
+  .in-grid{grid-template-columns:repeat(3,1fr)}
+}
+
+/* ─── DESKTOP TWEAKS ─── */
+@media(min-width:900px){
+  .disc-section-body,.pav-body{padding:10px}
+  .srv{padding:14px 18px}
+  .in-grid{max-width:560px}
+  .in-grid.geral{max-width:240px}
+}
+
+/* ─── BOTTOM SHEET ─── */
+.sheet-back{
+  position:fixed;inset:0;background:rgba(0,0,0,.55);
+  z-index:500;opacity:0;pointer-events:none;transition:opacity .2s;
+  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)
+}
+.sheet-back.open{opacity:1;pointer-events:auto}
+.sheet{
+  position:fixed;left:0;right:0;bottom:0;
+  background:var(--sf);border-top:1px solid var(--bd2);
+  border-radius:18px 18px 0 0;
+  z-index:510;max-height:80vh;overflow-y:auto;
+  padding:18px 18px calc(20px + var(--safe-b));
+  transform:translateY(100%);transition:transform .25s cubic-bezier(.2,.8,.2,1)
+}
+.sheet.open{transform:translateY(0)}
+.sheet-grip{width:36px;height:4px;border-radius:99px;background:var(--sf4);margin:0 auto 14px}
+.sheet h3{font-size:14px;font-weight:700;color:var(--tx);margin-bottom:12px;letter-spacing:-.01em}
+.sheet-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+@media(min-width:600px){.sheet-grid{grid-template-columns:repeat(3,1fr)}}
+.sheet-item{
+  padding:12px 14px;background:var(--sf2);border:1px solid var(--bd);
+  border-radius:var(--rl);cursor:pointer;display:flex;flex-direction:column;gap:4px;
+  transition:all .15s;text-align:left
+}
+.sheet-item:hover{border-color:var(--bd2);background:var(--sf3)}
+.sheet-item.active{border-color:var(--ac);background:var(--ac-w)}
+.sheet-item .si-label{font-size:13px;font-weight:600;color:var(--tx);line-height:1.1}
+.sheet-item .si-meta{font-size:10px;color:var(--tx3);font-family:'DM Mono',monospace;letter-spacing:.04em}
+.sheet-item .si-bar{height:3px;background:var(--sf3);border-radius:99px;overflow:hidden;margin-top:4px}
+.sheet-item .si-bar i{display:block;height:100%;background:var(--ac)}
+.sheet-item.active .si-bar{background:rgba(10,13,16,.2)}
+
+/* ─── HIDE NUM ARROWS ─── */
+.pi::-webkit-outer-spin-button,.pi::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.pi[type="number"]{-moz-appearance:textfield}
+
+/* ─── SCROLLBARS ─── */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--sf3);border-radius:99px}
+::-webkit-scrollbar-thumb:hover{background:var(--sf4)}
 </style>
 </head>
 <body>
 
-<header class="app-hdr">
-  <div class="hdr-l">
-    <span class="hdr-logo">O.M. <span style="font-weight:400;letter-spacing:.04em;color:var(--tx2)">Incorporadora</span></span>
-    <div class="hdr-sep"></div>
-    <span class="hdr-ttl">Autoria by Ornare — Medição Física</span>
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="brand">
+    <span>OM</span>
+    <span class="sep"></span>
+    <em>Autoria by Ornare · Medição Física</em>
+  </div>
+  <div class="sync-pill" id="sync-pill" title="Status de sincronização">
+    <span class="dot"></span>
+    <span class="txt">conectando…</span>
   </div>
 </header>
 
 <!-- DISCIPLINE TABS -->
-<nav class="disc-bar" id="disc-bar"></nav>
+<nav class="disc-tabs" id="disc-bar"></nav>
 
-<!-- TOOLBAR -->
-<div class="toolbar">
-  <span class="tlbl">Ir para:</span>
-  <select id="pav-jump" onchange="jumpTo(this.value)">
-    <option value="">— pavimento —</option>
-  </select>
-  <button class="btn" onclick="expandAll()">▼ Expandir todos</button>
-  <button class="btn" onclick="collapseAll()">▲ Recolher</button>
-  <div class="spacer"></div>
-  <span class="save-lbl" id="save-lbl">dados salvos localmente</span>
-  <button class="btn btn-ac" onclick="exportCSV()">↓ Exportar CSV</button>
+<!-- PAVIMENTO NAV -->
+<div class="pav-nav" id="pav-nav">
+  <div class="pav-nav-row">
+    <button class="pav-arrow" id="pav-prev" aria-label="Pavimento anterior">‹</button>
+    <div class="pav-current" id="pav-current" onclick="openPavSheet()">
+      <div class="pav-current-label" id="pav-label">
+        <span id="pav-label-txt">—</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="pav-current-sub">
+        <span id="pav-idx">—</span>
+        <span class="sep-dot"></span>
+        <span>avanço <b id="pav-pct">—</b></span>
+      </div>
+    </div>
+    <button class="pav-arrow" id="pav-next" aria-label="Próximo pavimento">›</button>
+  </div>
 </div>
 
 <!-- SUMMARY -->
-<div class="sum-strip">
-  <div class="sum-card"><div class="sl">Avanço geral</div><div class="sv" id="sg">—</div><div class="ss">disciplina ativa</div></div>
+<div class="summary">
+  <div class="sum-card"><div class="sl">Avanço geral</div><div class="sv" id="sg">—</div><div class="ss" id="sg-sub">aba ativa</div></div>
   <div class="sum-card"><div class="sl">Pavimentos lançados</div><div class="sv" id="sp">0</div><div class="ss">de 30 pavimentos</div></div>
   <div class="sum-card"><div class="sl">Campos preenchidos</div><div class="sv" id="sc">0</div><div class="ss" id="sct">de — total</div></div>
-  <div class="sum-card"><div class="sl">Última atualização</div><div class="sv" style="font-size:13px;padding-top:5px" id="sd">—</div><div class="ss">salvo no navegador</div></div>
+  <div class="sum-card"><div class="sl">Última atualização</div><div class="sv muted" id="sd">—</div><div class="ss">salvo no servidor</div></div>
 </div>
 
-<div class="main" id="main"></div>
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <button class="btn" onclick="expandAll()" id="btn-expand">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+    Expandir
+  </button>
+  <button class="btn" onclick="collapseAll()" id="btn-collapse">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
+    Recolher
+  </button>
+  <div class="spacer"></div>
+  <button class="btn btn-ac" onclick="exportCSV()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    CSV
+  </button>
+</div>
+
+<main class="main" id="main"></main>
+
+<!-- BOTTOM SHEET: pavimento picker -->
+<div class="sheet-back" id="sheet-back" onclick="closePavSheet()"></div>
+<div class="sheet" id="pav-sheet">
+  <div class="sheet-grip"></div>
+  <h3>Escolher pavimento</h3>
+  <div class="sheet-grid" id="sheet-grid"></div>
+</div>
 
 <script>
 // ═══════════════════════════════════════════════════════
-// DADOS — TODAS AS DISCIPLINAS
+// DADOS
 // ═══════════════════════════════════════════════════════
 const DISCIPLINAS = [
-  {
-    id:'paredes', label:'02.05 · Paredes', servicos:[
-      {cat:'Alvenaria de vedação',   id:'02.05.01.01', nome:'Alvenaria em tijolo cerâmico'},
-      {cat:'Marcação / Encunhamento',id:'02.05.01.09', nome:'Marcação de Alvenaria'},
-      {cat:'Marcação / Encunhamento',id:'02.05.01.10', nome:'Encunhamento de Alvenaria'},
-      {cat:'Vergas e Pingadeiras',   id:'02.05.02.01', nome:'Verga e Contra-Verga Pré-Moldada de Concreto'},
-    ]
-  },
-  {
-    id:'esq-madeira', label:'02.06 · Esq. Madeira', servicos:[
-      {cat:'Esquadrias de Madeira', id:'02.06.01.01', nome:'Esquadrias de Madeira'},
-      {cat:'Fechaduras e Puxadores', id:'02.06.02.01', nome:'Fechaduras e Puxadores'},
-    ]
-  },
-  {
-    id:'esq-metalica', label:'02.07 · Esq. Metálicas', servicos:[
-      {cat:'Esquadrias de Alumínio', id:'02.07.01.01', nome:'Contramarcos'},
-      {cat:'Esquadrias de Alumínio', id:'02.07.01.02', nome:'Janelas — Alumínio Eletrostático Preto'},
-      {cat:'Esquadrias de Alumínio', id:'02.07.01.03', nome:'Portas — Alumínio Eletrostático Preto'},
-      {cat:'Esquadrias de Alumínio', id:'02.07.01.04', nome:'Guarda Corpo / Gradis'},
-    ]
-  },
-
-  {
-    id:'hidro', label:'02.10 · Hidro', servicos:[
-      {cat:'Hidrossanitária', id:'02.10.02.02', nome:'Passagem de Laje'},
-      {cat:'Hidrossanitária', id:'02.10.02.03', nome:'Prumada'},
-      {cat:'Hidrossanitária', id:'02.10.02.04', nome:'Prolongamentos'},
-      {cat:'Hidrossanitária', id:'02.10.02.05', nome:'Incêndio'},
-      {cat:'Hidrossanitária', id:'02.10.02.10', nome:'Cavaletes de Hidrômetros e VRP'},
-      {cat:'Hidrossanitária', id:'02.10.02.09', nome:'Isométrico'},
-      {cat:'Hidrossanitária', id:'02.10.02.11', nome:'Esgoto Aéreo / Ramais'},
-    ]
-  },
-  {
-    id:'eletrica', label:'02.10 · Elétrica', servicos:[
-      {cat:'Instalações Elétricas', id:'02.09.01.01', nome:'Infra elétrica e sistemas'},
-      {cat:'Instalações Elétricas', id:'02.09.01.02', nome:'Passagem de Laje'},
-      {cat:'Instalações Elétricas', id:'02.09.01.03', nome:'Fiação Elétrica'},
-      {cat:'Instalações Elétricas', id:'02.09.01.04', nome:'Montagem de Medidor'},
-      {cat:'Instalações Elétricas', id:'02.09.01.05', nome:'Acabamento Elétrico'},
-      {cat:'Instalações Elétricas', id:'02.09.01.06', nome:'Quadros elétricos e de comandos'},
-      {cat:'Instalações Elétricas', id:'02.09.01.07', nome:'SPDA'},
-      {cat:'Instalações Elétricas', id:'02.09.01.08', nome:'Elevadores'},
-    ]
-  },
-  {
-    id:'inst-esp', label:'02.10 · Inst. Especiais', servicos:[
-      {cat:'Instalações Especiais', id:'02.10.02.02', nome:'Instalações de Ar Condicionado'},
-      {cat:'Instalações Especiais', id:'02.10.02.04', nome:'Gás GLP (material + MO)'},
-      {cat:'Instalações Especiais', id:'02.10.02.05', nome:'Exaustor Banhos e Serviço'},
-      {cat:'Instalações Especiais', id:'02.10.02.09', nome:'Exaustor Churrasqueiras'},
-    ]
-  },
-  {
-    id:'loucas', label:'02.11 · Louças / Metais', servicos:[
-      {cat:'Louças, Metais e Bancadas', id:'02.11.01.01', nome:'Louças e Metais'},
-      {cat:'Louças, Metais e Bancadas', id:'02.11.03.01', nome:'Bancadas'},
-    ]
-  },
-  {
-    id:'rev-reboco', label:'02.13 · Reboco', servicos:[
-      {cat:'Reboco e Chapisco', id:'02.13.01.01', nome:'Talisca'},
-      {cat:'Reboco e Chapisco', id:'02.13.01.02', nome:'Chapisco'},
-      {cat:'Reboco e Chapisco', id:'02.13.01.03', nome:'Reboco Interno'},
-    ]
-  },
-  {
-    id:'rev-ceramico', label:'02.13 · Rev. Cerâmico', servicos:[
-      {cat:'Revestimentos Cerâmicos', id:'02.13.02.01', nome:'Forma Branco'},
-      {cat:'Revestimentos Cerâmicos', id:'02.13.02.02', nome:'Rev 60x60'},
-    ]
-  },
-  {
-    id:'forro', label:'02.15 · Forro de Gesso', servicos:[
-      {cat:'Forro', id:'02.15.01.01', nome:'Forro de Gesso'},
-      {cat:'Forro', id:'02.15.02.01', nome:'Forro Vinílico'},
-    ]
-  },
-  {
-    id:'contrapiso', label:'02.16 · Contrapiso', servicos:[
-      {cat:'Contrapiso', id:'02.16.02.01', nome:'Contrapiso'},
-    ]
-  },
-  {
-    id:'pavimentacao', label:'02.16 · Pavimentação', servicos:[
-      {cat:'Pisos Cerâmicos / Porcelanatos', id:'02.16.03.01', nome:'Revestimento Cerâmico — Piso'},
-      {cat:'Pedras / Soleiras / Filetes', id:'02.16.07.01', nome:'Soleiras / Filetes'},
-      {cat:'Pedras / Soleiras / Filetes', id:'02.16.07.03', nome:'Peitoris'},
-    ]
-  },
-  {
-    id:'pintura', label:'02.17 · Pintura Interna', servicos:[
-      {cat:'Pintura Interna', id:'02.17.01.01', nome:'Massa PVA'},
-      {cat:'Pintura Interna', id:'02.17.01.02', nome:'Pintura Interna — 1ª Demão'},
-    ]
-  },
+  { id:'paredes', code:'02.05', label:'Paredes', servicos:[
+    {cat:'Alvenaria de vedação',    id:'02.05.01.01', nome:'Alvenaria em tijolo cerâmico'},
+    {cat:'Marcação / Encunhamento', id:'02.05.01.09', nome:'Marcação de Alvenaria'},
+    {cat:'Marcação / Encunhamento', id:'02.05.01.10', nome:'Encunhamento de Alvenaria'},
+    {cat:'Vergas e Pingadeiras',    id:'02.05.02.01', nome:'Verga e Contra-Verga Pré-Moldada de Concreto'},
+  ]},
+  { id:'esq-madeira', code:'02.06', label:'Esq. Madeira', servicos:[
+    {cat:'Esquadrias de Madeira',  id:'02.06.01.01', nome:'Esquadrias de Madeira'},
+    {cat:'Fechaduras e Puxadores', id:'02.06.02.01', nome:'Fechaduras e Puxadores'},
+  ]},
+  { id:'esq-metalica', code:'02.07', label:'Esq. Metálicas', servicos:[
+    {cat:'Esquadrias de Alumínio', id:'02.07.01.01', nome:'Contramarcos'},
+    {cat:'Esquadrias de Alumínio', id:'02.07.01.02', nome:'Janelas — Alumínio Eletrostático Preto'},
+    {cat:'Esquadrias de Alumínio', id:'02.07.01.03', nome:'Portas — Alumínio Eletrostático Preto'},
+    {cat:'Esquadrias de Alumínio', id:'02.07.01.04', nome:'Guarda Corpo / Gradis'},
+  ]},
+  { id:'hidro', code:'02.10', label:'Hidro', servicos:[
+    {cat:'Hidrossanitária', id:'02.10.02.02', nome:'Passagem de Laje'},
+    {cat:'Hidrossanitária', id:'02.10.02.03', nome:'Prumada'},
+    {cat:'Hidrossanitária', id:'02.10.02.04', nome:'Prolongamentos'},
+    {cat:'Hidrossanitária', id:'02.10.02.05', nome:'Incêndio'},
+    {cat:'Hidrossanitária', id:'02.10.02.10', nome:'Cavaletes de Hidrômetros e VRP'},
+    {cat:'Hidrossanitária', id:'02.10.02.09', nome:'Isométrico'},
+    {cat:'Hidrossanitária', id:'02.10.02.11', nome:'Esgoto Aéreo / Ramais'},
+  ]},
+  { id:'eletrica', code:'02.09', label:'Elétrica', servicos:[
+    {cat:'Instalações Elétricas', id:'02.09.01.01', nome:'Infra elétrica e sistemas'},
+    {cat:'Instalações Elétricas', id:'02.09.01.02', nome:'Passagem de Laje'},
+    {cat:'Instalações Elétricas', id:'02.09.01.03', nome:'Fiação Elétrica'},
+    {cat:'Instalações Elétricas', id:'02.09.01.04', nome:'Montagem de Medidor'},
+    {cat:'Instalações Elétricas', id:'02.09.01.05', nome:'Acabamento Elétrico'},
+    {cat:'Instalações Elétricas', id:'02.09.01.06', nome:'Quadros elétricos e de comandos'},
+    {cat:'Instalações Elétricas', id:'02.09.01.07', nome:'SPDA'},
+    {cat:'Instalações Elétricas', id:'02.09.01.08', nome:'Elevadores'},
+  ]},
+  { id:'inst-esp', code:'02.10', label:'Inst. Especiais', servicos:[
+    {cat:'Instalações Especiais', id:'02.10.02.02', nome:'Instalações de Ar Condicionado'},
+    {cat:'Instalações Especiais', id:'02.10.02.04', nome:'Gás GLP (material + MO)'},
+    {cat:'Instalações Especiais', id:'02.10.02.05', nome:'Exaustor Banhos e Serviço'},
+    {cat:'Instalações Especiais', id:'02.10.02.09', nome:'Exaustor Churrasqueiras'},
+  ]},
+  { id:'loucas', code:'02.11', label:'Louças/Metais', servicos:[
+    {cat:'Louças, Metais e Bancadas', id:'02.11.01.01', nome:'Louças e Metais'},
+    {cat:'Louças, Metais e Bancadas', id:'02.11.03.01', nome:'Bancadas'},
+  ]},
+  { id:'rev-reboco', code:'02.13', label:'Reboco', servicos:[
+    {cat:'Reboco e Chapisco', id:'02.13.01.01', nome:'Talisca'},
+    {cat:'Reboco e Chapisco', id:'02.13.01.02', nome:'Chapisco'},
+    {cat:'Reboco e Chapisco', id:'02.13.01.03', nome:'Reboco Interno'},
+  ]},
+  { id:'rev-ceramico', code:'02.13', label:'Rev. Cerâmico', servicos:[
+    {cat:'Revestimentos Cerâmicos', id:'02.13.02.01', nome:'Forma Branco'},
+    {cat:'Revestimentos Cerâmicos', id:'02.13.02.02', nome:'Rev 60x60'},
+  ]},
+  { id:'forro', code:'02.15', label:'Forro de Gesso', servicos:[
+    {cat:'Forro', id:'02.15.01.01', nome:'Forro de Gesso'},
+    {cat:'Forro', id:'02.15.02.01', nome:'Forro Vinílico'},
+  ]},
+  { id:'contrapiso', code:'02.16', label:'Contrapiso', servicos:[
+    {cat:'Contrapiso', id:'02.16.02.01', nome:'Contrapiso'},
+  ]},
+  { id:'pavimentacao', code:'02.16', label:'Pavimentação', servicos:[
+    {cat:'Pisos Cerâmicos / Porcelanatos', id:'02.16.03.01', nome:'Revestimento Cerâmico — Piso'},
+    {cat:'Pedras / Soleiras / Filetes',    id:'02.16.07.01', nome:'Soleiras / Filetes'},
+    {cat:'Pedras / Soleiras / Filetes',    id:'02.16.07.03', nome:'Peitoris'},
+  ]},
+  { id:'pintura', code:'02.17', label:'Pintura Interna', servicos:[
+    {cat:'Pintura Interna', id:'02.17.01.01', nome:'Massa PVA'},
+    {cat:'Pintura Interna', id:'02.17.01.02', nome:'Pintura Interna — 1ª Demão'},
+  ]},
 ];
 
 const PAVIMENTOS = [
@@ -257,686 +574,724 @@ const PAVIMENTOS = [
 const NUM_APTOS = 6;
 const PAV_GERAL = new Set(['SS1','TÉR','1º PAV (G1)','2º PAV (G2)','3º PAV (LAZ)']);
 const DISC_GERAL = new Set(['hidro','eletrica','inst-esp','rev-reboco','contrapiso','paredes']);
-const APTOS_DEF = ['Final 01','Final 02','Final 03','Final 04','Final 05','Final 06'];
-const SK = 'medicao_autoria_v3';
+const APTOS_DEF = ['F1','F2','F3','F4','F5','F6'];
+const SK = 'medicao_autoria_v4';
 
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 // STATE
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 let state = {};
-let discAtiva = 'por-pavimento';
+let view = 'pavimento';        // 'pavimento' or 'disc'
+let activeDisc = null;          // discipline id (when view==='disc')
+let activePav = '4º PAV';       // active pavimento (when view==='pavimento')
+let lastPollTime = new Date().toISOString();
 
-function initState() {
+function initState(){
   const saved = localStorage.getItem(SK);
-  if (saved) { try { state = JSON.parse(saved); } catch(e){} }
+  if(saved){ try{ state = JSON.parse(saved); }catch(e){} }
   DISCIPLINAS.forEach(d => {
-    if (!state[d.id]) state[d.id] = {};
+    if(!state[d.id]) state[d.id] = {};
     PAVIMENTOS.forEach(pav => {
-      if (!state[d.id][pav]) state[d.id][pav] = { aptos: [...APTOS_DEF], vals: {} };
-      if (!state[d.id][pav].aptos) state[d.id][pav].aptos = [...APTOS_DEF];
+      if(!state[d.id][pav]) state[d.id][pav] = { aptos:[...APTOS_DEF], vals:{} };
+      if(!state[d.id][pav].aptos) state[d.id][pav].aptos = [...APTOS_DEF];
       d.servicos.forEach(s => {
         const slots = isGeralMode(d.id, pav) ? 1 : NUM_APTOS;
-        if (!state[d.id][pav].vals[s.id]) state[d.id][pav].vals[s.id] = Array(slots).fill('');
+        if(!state[d.id][pav].vals[s.id]) state[d.id][pav].vals[s.id] = Array(slots).fill('');
       });
     });
   });
 }
 
-
-
-
 // ═══════════════════════════════════════════════════════
-// INTEGRAÇÃO SUPABASE — dados em tempo real
+// HELPERS
 // ═══════════════════════════════════════════════════════
-const SB = {
-  url: 'https://saptnnxonigojjjxicnx.supabase.co',
-  key: 'sb_publishable_MIRdOCs402xbloYDPWrv-A_Ht_1d9Zz',
-  table: 'medicao',
-  projeto: 'Autoria',
-};
-
-let sbCache = {};     // chave_unica -> id do registro
-let syncQueue = {};   // chave_unica -> dados para salvar
-let syncTimer = null;
-
-function sbHeaders() {
-  return {
-    'Content-Type': 'application/json',
-    'apikey': SB.key,
-    'Authorization': 'Bearer ' + SB.key,
-    'Prefer': 'resolution=merge-duplicates',
-  };
-}
-
-function setStatus(s, msg) {
-  const el = document.getElementById('save-lbl');
-  if (!el) return;
-  if (s === 'syncing') { el.textContent = '⟳ sincronizando...'; el.style.color = ''; el.className = 'save-lbl'; }
-  if (s === 'ok')      { el.textContent = '✓ salvo · ' + new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); el.style.color = 'var(--ok)'; el.className = 'save-lbl ok'; }
-  if (s === 'error')   { el.textContent = '✗ erro — ' + (msg||'verifique conexão'); el.style.color = 'var(--low)'; el.className = 'save-lbl'; }
-}
-
-
-// ── POLLING — verifica mudanças a cada 10s ────────────
-let lastPollTime = new Date().toISOString();
-
-async function sbPoll() {
-  try {
-    const url = SB.url + '/rest/v1/' + SB.table +
-      '?projeto=eq.' + encodeURIComponent(SB.projeto) +
-      '&updated_at=gt.' + encodeURIComponent(lastPollTime) +
-      '&select=*&limit=5000';
-    const r = await fetch(url, { headers: sbHeaders() });
-    if (!r.ok) return;
-    const rows = await r.json();
-    if (!rows.length) return;
-
-    let changed = false;
-    rows.forEach(row => {
-      const disc = row.disciplina;
-      const pav  = row.pavimento;
-      const sid  = row.servico_id;
-      const ai   = parseInt(row.final_idx) || 0;
-      const val  = row.valor !== null && row.valor !== undefined ? String(row.valor) : '';
-
-      if (!state[disc] || !state[disc][pav] || state[disc][pav].vals[sid] === undefined) return;
-      if (state[disc][pav].vals[sid][ai] === val) return; // sem mudança
-
-      state[disc][pav].vals[sid][ai] = val;
-      changed = true;
-
-      // Atualizar campo visível que não está em foco
-      const inputEl = document.querySelector(`input[data-key="${disc}|${pav}|${sid}|${ai}"]`);
-      if (inputEl && document.activeElement !== inputEl) {
-        inputEl.value = val;
-        inputEl.classList.toggle('hv', val !== '');
-      }
-
-      // Atualizar badge de média
-      const k    = sid(disc + '_' + pav);
-      const isSafe = sid(sid);
-      const me   = document.getElementById('med_' + k + '_' + isSafe);
-      if (me) {
-        const avg = getMedia(disc, pav, sid);
-        const ar  = avg !== null ? Math.round(avg) : null;
-        me.className = 'badge ' + bClass(ar);
-        me.textContent = fmt(ar);
-      }
-      updatePavHeader(disc, pav);
-    });
-
-    if (changed) {
-      lastPollTime = new Date().toISOString();
-      updateSummary();
-      saveState();
-      const lbl = document.getElementById('save-lbl');
-      if (lbl) {
-        lbl.textContent = '↓ atualizado';
-        lbl.style.color = 'var(--mid)';
-        setTimeout(() => setStatus('ok'), 2000);
-      }
-    }
-  } catch(e) { console.error('Poll error:', e); }
-}
-
-function startPolling() {
-  lastPollTime = new Date(Date.now() - 1000).toISOString();
-  setInterval(sbPoll, 10000); // a cada 10 segundos
-}
-
-// Carregar todos os dados ao abrir o app
-async function sbLoadAll() {
-  setStatus('syncing');
-  try {
-    const url = SB.url + '/rest/v1/' + SB.table +
-      '?projeto=eq.' + encodeURIComponent(SB.projeto) +
-      '&select=*&limit=50000';
-    const r = await fetch(url, { headers: sbHeaders() });
-    if (!r.ok) throw new Error(await r.text());
-    const rows = await r.json();
-
-    rows.forEach(row => {
-      const disc  = row.disciplina;
-      const pav   = row.pavimento;
-      const sid   = row.servico_id;
-      const ai    = parseInt(row.final_idx) || 0;
-      const val   = row.valor !== null && row.valor !== undefined ? String(row.valor) : '';
-      const chave = row.chave_unica;
-      if (state[disc] && state[disc][pav] && state[disc][pav].vals[sid] !== undefined) {
-        state[disc][pav].vals[sid][ai] = val;
-        sbCache[chave] = row.id;
-      }
-    });
-
-    // Atualizar UI completa
-    DISCIPLINAS.forEach(d => PAVIMENTOS.forEach(pav => updatePavHeader(d.id, pav)));
-    buildViewPavimento(PAVIMENTOS[5]);
-    updateSummary();
-    saveState();
-    setStatus('ok');
-  } catch(e) {
-    console.error('Supabase load error:', e);
-    setStatus('error', 'falha ao carregar');
-  }
-}
-
-// Salvar um valor (upsert por chave_unica)
-async function sbSave(disc, pav, servId, ai, val) {
-  const chave = SB.projeto + '|' + disc + '|' + pav + '|' + servId + '|' + ai;
-  const body = JSON.stringify({
-    projeto:     SB.projeto,
-    disciplina:  disc,
-    pavimento:   pav,
-    servico_id:  servId,
-    final_idx:   ai,
-    valor:       val === '' ? null : parseFloat(val),
-    chave_unica: chave,
-    updated_at:  new Date().toISOString(),
-  });
-  try {
-    const r = await fetch(SB.url + '/rest/v1/' + SB.table, {
-      method: 'POST',
-      headers: { ...sbHeaders(), 'Prefer': 'resolution=merge-duplicates,return=minimal' },
-      body,
-    });
-    if (!r.ok) throw new Error(await r.text());
-    setStatus('ok');
-  } catch(e) {
-    console.error('Supabase save error:', e);
-    setStatus('error');
-  }
-}
-
-// Debounce: aguarda 1s após última digitação para salvar
-function queueSync(disc, pav, servId, ai, val) {
-  const chave = disc + '|' + pav + '|' + servId + '|' + ai;
-  syncQueue[chave] = { disc, pav, servId, ai, val };
-  setStatus('syncing');
-  clearTimeout(syncTimer);
-  syncTimer = setTimeout(async () => {
-    const entries = Object.values(syncQueue);
-    syncQueue = {};
-    for (const e of entries) {
-      await sbSave(e.disc, e.pav, e.servId, e.ai, e.val);
-    }
-  }, 1000);
-}
-
-function saveState() {
-  localStorage.setItem(SK, JSON.stringify(state));
-  const el = document.getElementById('save-lbl');
-  if (el) { el.textContent = 'salvo · ' + new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); el.classList.add('ok'); }
-}
-
-// ═══════════════════════════════════════════
-// CÁLCULOS
-// ═══════════════════════════════════════════
-function sid(s){ return s.replace(/[^a-zA-Z0-9]/g,'_'); }
+function safeId(s){ return s.replace(/[^a-zA-Z0-9]/g,'_'); }
 function isGeralMode(disc, pav){ return PAV_GERAL.has(pav) || DISC_GERAL.has(disc); }
+function fmt(v){ return v!==null && v!==undefined ? Math.round(v)+'%' : '—'; }
 
-function getMedia(disc, pav, itemId) {
-  const raw = state[disc][pav].vals[itemId];
+function getMedia(disc, pav, itemId){
+  const raw = state[disc]?.[pav]?.vals?.[itemId];
+  if(!raw) return null;
   const divisor = isGeralMode(disc, pav) ? 1 : NUM_APTOS;
-  const hasAny = raw.some(v => v !== '' && v !== null && v !== undefined);
-  if (!hasAny) return null;
-  const soma = raw.reduce((a,v) => a + (parseFloat(v) || 0), 0);
+  const hasAny = raw.some(v => v!=='' && v!=null);
+  if(!hasAny) return null;
+  const soma = raw.reduce((a,v) => a + (parseFloat(v)||0), 0);
   return soma / divisor;
 }
 
-function getAvgPav(disc, pav) {
-  const d = DISCIPLINAS.find(x=>x.id===disc);
+function getAvgDisc(disc, pav){
+  const d = DISCIPLINAS.find(x => x.id===disc);
+  if(!d) return null;
   let soma=0, cnt=0;
-  d.servicos.forEach(s=>{ const m=getMedia(disc,pav,s.id); if(m!==null){soma+=m;cnt++;} });
+  d.servicos.forEach(s => { const m=getMedia(disc, pav, s.id); if(m!==null){ soma+=m; cnt++; } });
   return cnt ? soma/cnt : null;
 }
 
-function bClass(v) {
+function getAvgPavGlobal(pav){
+  // média de TODAS as disciplinas para este pavimento
+  let soma=0, cnt=0;
+  DISCIPLINAS.forEach(d => { const a=getAvgDisc(d.id, pav); if(a!==null){ soma+=a; cnt++; } });
+  return cnt ? soma/cnt : null;
+}
+
+function getAvgDiscGlobal(disc){
+  // média de todos pavimentos para esta disciplina
+  let soma=0, cnt=0;
+  PAVIMENTOS.forEach(p => { const a=getAvgDisc(disc, p); if(a!==null){ soma+=a; cnt++; } });
+  return cnt ? soma/cnt : null;
+}
+
+function bClass(v){
   if(v===null||v===undefined) return 'b-na';
   if(v>=90) return 'b-ok';
   if(v>=40) return 'b-mid';
   if(v>0)   return 'b-low';
   return 'b-zero';
 }
-
-function pClass(v) {
+function pClass(v){
   if(!v||v===0) return 'pg-z';
   if(v>=90) return 'pg-ok';
   if(v>=40) return 'pg-mid';
   return 'pg-low';
 }
 
-function fmt(v){ return v!==null ? Math.round(v)+'%' : '—'; }
+// ═══════════════════════════════════════════════════════
+// SUPABASE
+// ═══════════════════════════════════════════════════════
+const SB = {
+  url:'https://saptnnxonigojjjxicnx.supabase.co',
+  key:'sb_publishable_MIRdOCs402xbloYDPWrv-A_Ht_1d9Zz',
+  table:'medicao',
+  projeto:'Autoria',
+};
+let syncQueue = {};
+let syncTimer = null;
 
-// ═══════════════════════════════════════════
-// DOM UPDATES
-// ═══════════════════════════════════════════
-function updatePavHeader(disc, pav) {
-  const k = sid(disc+'_'+pav);
-  const avg = getAvgPav(disc, pav);
-  const pct = avg!==null ? Math.round(avg) : null;
-  const pe = document.getElementById('prog_'+k);
-  const fe = document.getElementById('fill_'+k);
-  if(pe) pe.textContent = fmt(pct);
-  if(fe){ fe.style.width=(avg?Math.min(avg,100):0)+'%'; fe.className='pav-bf '+pClass(pct); }
-  // Atualizar também o header da disciplina na view por pavimento
-  const pvAvgEl = document.getElementById('pvavg_'+k);
-  const pvFillEl = document.getElementById('pvfill_'+k);
-  if(pvAvgEl) pvAvgEl.textContent = fmt(pct);
-  if(pvFillEl){ pvFillEl.style.width=(avg?Math.min(avg,100):0)+'%'; pvFillEl.className='pav-bf '+pClass(pct); }
+function sbHeaders(){
+  return {
+    'Content-Type':'application/json',
+    'apikey':SB.key,
+    'Authorization':'Bearer '+SB.key,
+    'Prefer':'resolution=merge-duplicates',
+  };
 }
 
-function updateSummary() {
-  // Na view "Por Pavimento" usar todas as disciplinas; senão só a ativa
-  const discs = discAtiva === 'por-pavimento' ? DISCIPLINAS : [DISCIPLINAS.find(x=>x.id===discAtiva)].filter(Boolean);
-  if (!discs.length) return;
-  let soma=0,cnt=0,campos=0,pavLanc=0,totalCampos=0;
-  PAVIMENTOS.forEach(pav=>{
-    let pavTemDado = false;
-    discs.forEach(d=>{
-      totalCampos += d.servicos.length * NUM_APTOS;
-      d.servicos.forEach(s=>{
-        state[d.id][pav].vals[s.id].forEach(v=>{ if(v!==''&&v!=null){ campos++; pavTemDado=true; } });
-      });
+function setSync(s, msg){
+  const el = document.getElementById('sync-pill');
+  if(!el) return;
+  el.classList.remove('s-ok','s-sync','s-err','s-recv');
+  const txt = el.querySelector('.txt');
+  if(s==='syncing'){ el.classList.add('s-sync'); txt.textContent='sincronizando'; }
+  else if(s==='ok'){ el.classList.add('s-ok'); txt.textContent='sincronizado · '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }
+  else if(s==='error'){ el.classList.add('s-err'); txt.textContent=msg||'erro'; }
+  else if(s==='recv'){ el.classList.add('s-recv'); txt.textContent='recebendo…'; }
+}
+
+async function sbLoadAll(){
+  setSync('syncing');
+  try {
+    const url = SB.url+'/rest/v1/'+SB.table+'?projeto=eq.'+encodeURIComponent(SB.projeto)+'&select=*&limit=50000';
+    const r = await fetch(url, { headers:sbHeaders() });
+    if(!r.ok) throw new Error(await r.text());
+    const rows = await r.json();
+    rows.forEach(row => {
+      const disc = row.disciplina, pav = row.pavimento, sid = row.servico_id;
+      const ai = parseInt(row.final_idx)||0;
+      const val = row.valor!=null ? String(row.valor) : '';
+      if(state[disc]?.[pav]?.vals?.[sid]!==undefined){
+        state[disc][pav].vals[sid][ai] = val;
+      }
     });
-    // Média global do pavimento na aba ativa
-    if(discAtiva !== 'por-pavimento'){
-      const avg=getAvgPav(discAtiva,pav);
-      if(avg!==null){soma+=avg;cnt++;pavLanc++;}
-    } else if(pavTemDado) {
-      pavLanc++;
-    }
-  });
-  if(discAtiva !== 'por-pavimento'){
-    document.getElementById('sg').textContent = cnt ? Math.round(soma/cnt)+'%':'—';
-  } else {
-    document.getElementById('sg').textContent = '—';
+    lastPollTime = new Date().toISOString();
+    rerenderActiveView();
+    updateSummary();
+    saveLocal();
+    setSync('ok');
+  } catch(e){
+    console.error('Load error',e);
+    setSync('error','falha ao carregar');
   }
-  document.getElementById('sp').textContent = pavLanc;
-  document.getElementById('sc').textContent = campos;
-  document.getElementById('sct').textContent = 'de '+totalCampos+' total';
-  document.getElementById('sd').textContent = new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})+' '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
 }
 
-// ═══════════════════════════════════════════
-// EVENTS
-// ═══════════════════════════════════════════
-function onInput(disc, pav, itemId, ai, el) {
-  let v = el.value.replace(/[^\d.]/g,'');
-  if(v!==''&&parseFloat(v)>100) v='100';
-  el.value=v;
-  el.classList.toggle('hv',v!=='');
-  state[disc][pav].vals[itemId][ai]=v;
-  if(!isGeralMode(disc, pav)){
-    const k=sid(disc+'_'+pav);
-    const is=sid(itemId);
-    const me=document.getElementById('med_'+k+'_'+is);
-    const avg=getMedia(disc,pav,itemId);
-    const ar=avg!==null?Math.round(avg):null;
-    if(me){me.className='badge '+bClass(ar);me.textContent=fmt(ar);}
+async function sbPoll(){
+  try {
+    const url = SB.url+'/rest/v1/'+SB.table
+      +'?projeto=eq.'+encodeURIComponent(SB.projeto)
+      +'&updated_at=gt.'+encodeURIComponent(lastPollTime)
+      +'&select=*&limit=5000';
+    const r = await fetch(url, { headers:sbHeaders() });
+    if(!r.ok) return;
+    const rows = await r.json();
+    if(!rows.length) return;
+    let changed = false;
+    setSync('recv');
+    rows.forEach(row => {
+      const disc = row.disciplina, pav = row.pavimento, sid = row.servico_id;
+      const ai = parseInt(row.final_idx)||0;
+      const val = row.valor!=null ? String(row.valor) : '';
+      if(state[disc]?.[pav]?.vals?.[sid]===undefined) return;
+      if(state[disc][pav].vals[sid][ai] === val) return;
+      state[disc][pav].vals[sid][ai] = val;
+      changed = true;
+      // atualizar input visível se não estiver em foco
+      const inp = document.querySelector(`input[data-k="${disc}|${pav}|${sid}|${ai}"]`);
+      if(inp && document.activeElement !== inp){
+        inp.value = val;
+        inp.classList.toggle('hv', val!=='');
+        inp.classList.remove('recv-flash');
+        void inp.offsetWidth;
+        inp.classList.add('recv-flash');
+      }
+      // atualizar badge da média
+      const ms = document.querySelector(`[data-m="${disc}|${pav}|${sid}"]`);
+      if(ms){
+        const avg = getMedia(disc, pav, sid);
+        const ar = avg!==null ? Math.round(avg) : null;
+        ms.className = 'badge '+bClass(ar);
+        ms.textContent = fmt(ar);
+      }
+      updateDiscBar(disc, pav);
+    });
+    lastPollTime = new Date().toISOString();
+    if(changed){
+      updateSummary();
+      updatePavSheet();
+      saveLocal();
+    }
+    setTimeout(()=>setSync('ok'), 800);
+  } catch(e){ console.error('Poll error',e); }
+}
+
+async function sbSave(disc, pav, servId, ai, val){
+  const chave = SB.projeto+'|'+disc+'|'+pav+'|'+servId+'|'+ai;
+  const body = JSON.stringify({
+    projeto:SB.projeto, disciplina:disc, pavimento:pav,
+    servico_id:servId, final_idx:ai,
+    valor: val==='' ? null : parseFloat(val),
+    chave_unica:chave,
+    updated_at:new Date().toISOString(),
+  });
+  try {
+    const r = await fetch(SB.url+'/rest/v1/'+SB.table, {
+      method:'POST',
+      headers:{ ...sbHeaders(), 'Prefer':'resolution=merge-duplicates,return=minimal' },
+      body,
+    });
+    if(!r.ok) throw new Error(await r.text());
+  } catch(e){
+    console.error('Save error',e);
+    setSync('error');
+    throw e;
   }
-  updatePavHeader(disc,pav);
+}
+
+function queueSync(disc, pav, servId, ai, val){
+  const key = disc+'|'+pav+'|'+servId+'|'+ai;
+  syncQueue[key] = { disc, pav, servId, ai, val };
+  setSync('syncing');
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(async () => {
+    const entries = Object.values(syncQueue);
+    syncQueue = {};
+    try {
+      for(const e of entries) await sbSave(e.disc, e.pav, e.servId, e.ai, e.val);
+      setSync('ok');
+    } catch(_){}
+  }, 700);
+}
+
+function saveLocal(){
+  try { localStorage.setItem(SK, JSON.stringify(state)); } catch(e){}
+}
+
+function startPolling(){
+  lastPollTime = new Date(Date.now()-1000).toISOString();
+  setInterval(sbPoll, 10000);
+}
+
+// ═══════════════════════════════════════════════════════
+// EVENTS
+// ═══════════════════════════════════════════════════════
+function onInput(disc, pav, itemId, ai, el){
+  let v = el.value.replace(/[^\d.]/g,'');
+  if(v!=='' && parseFloat(v)>100) v='100';
+  el.value = v;
+  el.classList.toggle('hv', v!=='');
+  state[disc][pav].vals[itemId][ai] = v;
+  if(!isGeralMode(disc,pav)){
+    const ms = document.querySelector(`[data-m="${disc}|${pav}|${itemId}"]`);
+    if(ms){
+      const avg = getMedia(disc, pav, itemId);
+      const ar = avg!==null ? Math.round(avg) : null;
+      ms.className = 'badge '+bClass(ar);
+      ms.textContent = fmt(ar);
+    }
+  }
+  updateDiscBar(disc, pav);
   updateSummary();
-  saveState();
+  saveLocal();
   queueSync(disc, pav, itemId, ai, v);
 }
 
-function onAptoName(disc, pav, ai, el) {
-  state[disc][pav].aptos[ai]=el.value||APTOS_DEF[ai];
-  const k=sid(disc+'_'+pav);
-  const th=document.getElementById('th_'+k+'_'+ai);
-  if(th) th.textContent=state[disc][pav].aptos[ai];
-  saveState();
+function onAptoName(disc, pav, ai, el){
+  state[disc][pav].aptos[ai] = el.value || APTOS_DEF[ai];
+  // atualizar labels dos inputs
+  document.querySelectorAll(`[data-apto-of="${disc}|${pav}|${ai}"]`).forEach(lbl => {
+    lbl.textContent = state[disc][pav].aptos[ai];
+  });
+  saveLocal();
 }
 
-// ═══════════════════════════════════════════
-// BUILD TABLE
-// ═══════════════════════════════════════════
-function buildTable(disc, pav) {
-  const d=DISCIPLINAS.find(x=>x.id===disc);
-  const k=sid(disc+'_'+pav);
-  const isGeral=isGeralMode(disc, pav);
-  const aptos=state[disc][pav].aptos;
-  let h='<div class="tw"><table><thead><tr>';
-  h+='<th>Código</th><th>Serviço</th>';
-  if(isGeral){
-    h+='<th class="c">% Avanço</th>';
-  } else {
-    for(let i=0;i<NUM_APTOS;i++) h+=`<th class="c" id="th_${k}_${i}">${aptos[i]}</th>`;
-    h+='<th class="c">Média</th>';
-  }
-  h+='</tr></thead><tbody>';
-  let lastCat='';
-  d.servicos.forEach(s=>{
-    const cols=isGeral?3:NUM_APTOS+3;
-    if(s.cat!==lastCat){ h+=`<tr class="cat-row"><td colspan="${cols}">${s.cat}</td></tr>`; lastCat=s.cat; }
-    const avg=getMedia(disc,pav,s.id);
-    const ar=avg!==null?Math.round(avg):null;
-    const is=sid(s.id);
-    const dS=disc.replace(/'/g,"\\x27"); const pS=pav.replace(/'/g,"\\x27"); const iS=s.id.replace(/'/g,"\\x27");
-    h+=`<tr><td class="tc">${s.id}</td><td class="tn">${s.nome}</td>`;
+// ═══════════════════════════════════════════════════════
+// RENDER: cards comuns
+// ═══════════════════════════════════════════════════════
+function renderServicos(disc, pav){
+  const d = DISCIPLINAS.find(x => x.id===disc);
+  const isGeral = isGeralMode(disc, pav);
+  const aptos = state[disc][pav].aptos;
+  let html = '';
+
+  let lastCat = '';
+  d.servicos.forEach(s => {
+    const showCat = s.cat !== lastCat;
+    lastCat = s.cat;
+    const avg = getMedia(disc, pav, s.id);
+    const ar = avg!==null ? Math.round(avg) : null;
+    const dS = disc, pS = pav, iS = s.id;
+    html += '<div class="srv">';
+    html += '<div class="srv-hdr">';
+    html += '<div style="flex:1;min-width:0">';
+    if(showCat) html += `<div class="srv-cat">${s.cat}</div>`;
+    html += `<div class="srv-name">${s.nome}</div>`;
+    html += `<span class="srv-code">${s.id}</span>`;
+    html += '</div>';
+    html += '<div class="srv-avg-wrap">';
+    html += `<span class="srv-avg-lbl">${isGeral?'%':'média'}</span>`;
     if(isGeral){
-      const v=state[disc][pav].vals[s.id][0];
-      const hv=v!==''&&v!=null;
-      h+=`<td class="ti"><input class="pi${hv?' hv':''}" type="text" inputmode="decimal" maxlength="5" value="${v||''}" placeholder="—" oninput="onInput('${dS}','${pS}','${iS}',0,this)"></td>`;
+      html += `<span class="badge ${bClass(ar)}" data-m="${dS}|${pS}|${iS}">${fmt(ar)}</span>`;
     } else {
+      html += `<span class="badge ${bClass(ar)}" data-m="${dS}|${pS}|${iS}">${fmt(ar)}</span>`;
+    }
+    html += '</div></div>';
+
+    // inputs
+    if(isGeral){
+      const v = state[disc][pav].vals[s.id][0];
+      const hv = v!=='' && v!=null;
+      html += '<div class="in-grid geral">';
+      html += '<div class="in-cell">';
+      html += `<label>% avanço</label>`;
+      html += `<input class="pi${hv?' hv':''}" type="text" inputmode="decimal" maxlength="5" value="${v||''}" placeholder="—" data-k="${dS}|${pS}|${iS}|0" oninput="onInput('${dS}','${pS}','${iS}',0,this)">`;
+      html += '</div></div>';
+    } else {
+      html += '<div class="in-grid">';
       for(let i=0;i<NUM_APTOS;i++){
-        const v=state[disc][pav].vals[s.id][i];
-        const hv=v!==''&&v!=null;
-        h+=`<td class="ti"><input class="pi${hv?' hv':''}" type="text" inputmode="decimal" maxlength="5" value="${v||''}" placeholder="—" data-key="${dS}|${pS}|${iS}|${i}" oninput="onInput('${dS}','${pS}','${iS}',${i},this)"></td>`;
+        const v = state[disc][pav].vals[s.id][i];
+        const hv = v!=='' && v!=null;
+        html += '<div class="in-cell">';
+        html += `<label data-apto-of="${dS}|${pS}|${i}">${aptos[i]}</label>`;
+        html += `<input class="pi${hv?' hv':''}" type="text" inputmode="decimal" maxlength="5" value="${v||''}" placeholder="—" data-k="${dS}|${pS}|${iS}|${i}" oninput="onInput('${dS}','${pS}','${iS}',${i},this)">`;
+        html += '</div>';
       }
-      h+=`<td class="tm"><span class="badge ${bClass(ar)}" id="med_${k}_${is}">${fmt(ar)}</span></td>`;
+      html += '</div>';
     }
-    h+='</tr>';
+    html += '</div>';
   });
-  h+='</tbody></table></div>';
-  return h;
+  return html;
 }
 
-function buildAptoConfig(disc, pav) {
+function renderAptosConfig(disc, pav){
   if(isGeralMode(disc, pav)) return '';
-  const k=sid(disc+'_'+pav);
-  const aptos=state[disc][pav].aptos;
-  const dS=disc.replace(/'/g,"\\x27");const pS=pav.replace(/'/g,"\\x27");
-  let h='<div class="apto-cfg"><span class="apto-cfg-lbl">Finais:</span>';
+  const aptos = state[disc][pav].aptos;
+  const dS = disc, pS = pav;
+  const cfgId = 'cfg_'+safeId(disc+'_'+pav);
+  let h = `<div class="aptos-toggle" onclick="document.getElementById('${cfgId}').classList.toggle('open')">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    Renomear finais
+  </div>`;
+  h += `<div class="aptos-cfg" id="${cfgId}">
+    <div class="aptos-cfg-hdr">Identificação dos finais (apartamentos)</div>
+    <div class="aptos-cfg-inputs">`;
   for(let i=0;i<NUM_APTOS;i++){
-    h+=`<input class="apto-inp" type="text" value="${aptos[i]}" maxlength="12" placeholder="Final ${i+1}" onchange="onAptoName('${dS}','${pS}',${i},this)">`;
+    h += `<input class="apto-inp" type="text" value="${aptos[i]}" maxlength="12" placeholder="Final ${i+1}" onchange="onAptoName('${dS}','${pS}',${i},this)">`;
   }
-  h+='</div>';
+  h += '</div></div>';
   return h;
 }
 
-// ═══════════════════════════════════════════
-// PAV TOGGLE
-// ═══════════════════════════════════════════
-function togglePav(disc, pav) {
-  const k=sid(disc+'_'+pav);
-  const block=document.getElementById('block_'+k);
-  const body=document.getElementById('body_'+k);
-  if(!body) return;
-  const isOpen=body.classList.contains('open');
-  if(!isOpen&&!body.dataset.built){ body.innerHTML=buildAptoConfig(disc,pav)+buildTable(disc,pav); body.dataset.built='1'; }
-  body.classList.toggle('open',!isOpen);
-  block.classList.toggle('open',!isOpen);
-}
-
-function expandAll() {
-  PAVIMENTOS.forEach(pav=>{
-    const k=sid(discAtiva+'_'+pav);
-    const block=document.getElementById('block_'+k);
-    const body=document.getElementById('body_'+k);
-    if(!body) return;
-    if(!body.dataset.built){ body.innerHTML=buildAptoConfig(discAtiva,pav)+buildTable(discAtiva,pav); body.dataset.built='1'; }
-    body.classList.add('open'); block.classList.add('open');
-  });
-}
-
-function collapseAll() {
-  PAVIMENTOS.forEach(pav=>{
-    const k=sid(discAtiva+'_'+pav);
-    document.getElementById('body_'+k)?.classList.remove('open');
-    document.getElementById('block_'+k)?.classList.remove('open');
-  });
-}
-
-function jumpTo(pav) {
-  if(!pav) return;
-  const k=sid(discAtiva+'_'+pav);
-  const block=document.getElementById('block_'+k);
-  const body=document.getElementById('body_'+k);
-  if(!body) return;
-  if(!body.dataset.built){ body.innerHTML=buildAptoConfig(discAtiva,pav)+buildTable(discAtiva,pav); body.dataset.built='1'; }
-  body.classList.add('open'); block.classList.add('open');
-  setTimeout(()=>block.scrollIntoView({behavior:'smooth',block:'start'}),50);
-}
-
-// ═══════════════════════════════════════════
-// DISCIPLINE SWITCH
-// ═══════════════════════════════════════════
-// ═══════════════════════════════════════════
-// VIEW POR PAVIMENTO
-// ═══════════════════════════════════════════
-function buildViewPavimento(pav) {
-  const panel = document.getElementById('panel_por-pavimento');
-  if (!panel) return;
+// ═══════════════════════════════════════════════════════
+// RENDER: View PAVIMENTO (default — todas disciplinas para um pavimento)
+// ═══════════════════════════════════════════════════════
+function renderViewPavimento(pav){
+  const panel = document.getElementById('panel_pavimento');
   panel.innerHTML = '';
-
-  // Seletor de pavimento
-  const selWrap = document.createElement('div');
-  selWrap.className = 'pv-select';
-  selWrap.innerHTML = '<label>Pavimento:</label>';
-  const sel = document.createElement('select');
-  PAVIMENTOS.forEach(p => {
-    const o = document.createElement('option');
-    o.value = p; o.textContent = p;
-    if (p === pav) o.selected = true;
-    sel.appendChild(o);
-  });
-  sel.onchange = () => buildViewPavimento(sel.value);
-  selWrap.appendChild(sel);
-  panel.appendChild(selWrap);
-
-  // Uma seção por disciplina
   DISCIPLINAS.forEach(d => {
-    const isG = isGeralMode(d.id, pav);
-    const aptos = state[d.id][pav].aptos;
-    const avgPav = getAvgPav(d.id, pav);
-    const ar = avgPav !== null ? Math.round(avgPav) : null;
+    const k = safeId(d.id+'_'+pav);
+    const avg = getAvgDisc(d.id, pav);
+    const ar = avg!==null ? Math.round(avg) : null;
+    const sec = document.createElement('div');
+    sec.className = 'disc-section open';
+    sec.id = 'sec_'+k;
+    sec.innerHTML = `
+      <div class="disc-section-hdr" onclick="toggleSection('${d.id}','${pav}')">
+        <div class="disc-section-label">
+          <span class="disc-section-code">${d.code}</span>
+          <span>${d.label}</span>
+        </div>
+        <div class="disc-section-bar"><i class="${pClass(ar)}" id="bar_${k}" style="width:${ar?Math.min(ar,100):0}%"></i></div>
+        <span class="disc-section-avg" id="avg_${k}">${fmt(ar)}</span>
+        <svg class="disc-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="disc-section-body" id="body_${k}">
+        ${renderAptosConfig(d.id, pav)}
+        ${renderServicos(d.id, pav)}
+      </div>`;
+    panel.appendChild(sec);
+  });
+}
 
+function toggleSection(disc, pav){
+  const k = safeId(disc+'_'+pav);
+  document.getElementById('sec_'+k)?.classList.toggle('open');
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER: View DISCIPLINA (uma disciplina, todos pavimentos)
+// ═══════════════════════════════════════════════════════
+function renderViewDisc(discId){
+  const panel = document.getElementById('panel_disc');
+  panel.innerHTML = '';
+  const d = DISCIPLINAS.find(x => x.id===discId);
+  if(!d) return;
+  PAVIMENTOS.forEach((pav, pi) => {
+    const k = safeId(d.id+'_'+pav);
+    const avg = getAvgDisc(d.id, pav);
+    const ar = avg!==null ? Math.round(avg) : null;
     const block = document.createElement('div');
-    block.className = 'pv-disc-block';
-
-    const pvK2 = sid(d.id+'_'+pav);
-    let hdr = `<div class="pv-disc-hdr">
-      <span class="pv-disc-label">${d.label}</span>
-      <div class="pav-bw" style="flex:1"><div class="pav-bf ${pClass(ar)}" id="pvfill_${pvK2}" style="width:${ar?Math.min(ar,100):0}%"></div></div>
-      <span class="pv-disc-avg" id="pvavg_${pvK2}">${fmt(ar)}</span>
-    </div>`;
-
-    let tbl = '<div class="tw"><table><thead><tr><th>Serviço</th>';
-    if (isG) {
-      tbl += '<th class="c">% Avanço</th>';
-    } else {
-      for (let i = 0; i < NUM_APTOS; i++) tbl += `<th class="c">${aptos[i]}</th>`;
-      tbl += '<th class="c">Média</th>';
-    }
-    tbl += '</tr></thead><tbody>';
-
-    let lastCat = '';
-    d.servicos.forEach(s => {
-      if (s.cat !== lastCat) {
-        const cols = isG ? 2 : NUM_APTOS + 2;
-        tbl += `<tr class="cat-row"><td colspan="${cols}">${s.cat}</td></tr>`;
-        lastCat = s.cat;
-      }
-      const avg = getMedia(d.id, pav, s.id);
-      const avgR = avg !== null ? Math.round(avg) : null;
-      const dS = d.id.replace(/'/g,"\x27"); const pS = pav.replace(/'/g,"\x27"); const iS = s.id.replace(/'/g,"\x27");
-      tbl += `<tr><td class="tn">${s.nome}</td>`;
-      if (isG) {
-        const v = state[d.id][pav].vals[s.id][0];
-        const hv = v !== '' && v != null;
-        tbl += `<td class="ti"><input class="pi${hv?' hv':''}" type="text" inputmode="decimal" maxlength="5" value="${v||''}" placeholder="—" oninput="onInput('${dS}','${pS}','${iS}',0,this)"></td>`;
-      } else {
-        for (let i = 0; i < NUM_APTOS; i++) {
-          const v = state[d.id][pav].vals[s.id][i];
-          const hv = v !== '' && v != null;
-          tbl += `<td class="ti"><input class="pi${hv?' hv':''}" type="text" inputmode="decimal" maxlength="5" value="${v||''}" placeholder="—" data-key="${dS}|${pS}|${iS}|${i}" oninput="onInput('${dS}','${pS}','${iS}',${i},this)"></td>`;
-        }
-        const pvK=sid(d.id+'_'+pav); const pvIs=sid(s.id);
-        tbl += `<td class="tm"><span class="badge ${bClass(avgR)}" id="med_${pvK}_${pvIs}">${fmt(avgR)}</span></td>`;
-      }
-      tbl += '</tr>';
-    });
-    tbl += '</tbody></table></div>';
-    block.innerHTML = hdr + tbl;
+    block.className = 'pav-block';
+    block.id = 'block_'+k;
+    block.innerHTML = `
+      <div class="pav-hdr" onclick="togglePavBlock('${d.id}','${pav.replace(/'/g,"\\'")}')">
+        <span class="pav-num">${String(pi+1).padStart(2,'0')}</span>
+        <span class="pav-nm">${pav}</span>
+        <span class="pav-bw"><i class="pav-bf ${pClass(ar)}" id="bar_${k}" style="width:${ar?Math.min(ar,100):0}%"></i></span>
+        <span class="pav-pct" id="avg_${k}">${fmt(ar)}</span>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="pav-body" id="body_${k}"></div>`;
     panel.appendChild(block);
   });
 }
 
-function setDisc(discId) {
-  discAtiva=discId;
-  document.querySelectorAll('.dtab').forEach(t=>t.classList.toggle('active',t.dataset.disc===discId));
-  document.querySelectorAll('.disc-panel').forEach(p=>p.classList.toggle('active',p.id==='panel_'+discId));
-  if(discId==='por-pavimento') buildViewPavimento(PAVIMENTOS[5]);
-  else updateSummary();
+function togglePavBlock(disc, pav){
+  const k = safeId(disc+'_'+pav);
+  const block = document.getElementById('block_'+k);
+  const body = document.getElementById('body_'+k);
+  if(!body) return;
+  const open = block.classList.contains('open');
+  if(!open && !body.dataset.built){
+    body.innerHTML = renderAptosConfig(disc, pav) + renderServicos(disc, pav);
+    body.dataset.built = '1';
+  }
+  block.classList.toggle('open', !open);
 }
 
-// ═══════════════════════════════════════════
-// EXPORT CSV
-// ═══════════════════════════════════════════
-function exportCSV() {
-  // Se estiver na view "Por Pavimento", exporta todas as disciplinas juntas
-  const discsParaExportar = discAtiva === 'por-pavimento' ? DISCIPLINAS : [DISCIPLINAS.find(x=>x.id===discAtiva)];
+// ═══════════════════════════════════════════════════════
+// UPDATES (sem rerender completo)
+// ═══════════════════════════════════════════════════════
+function updateDiscBar(disc, pav){
+  const k = safeId(disc+'_'+pav);
+  const avg = getAvgDisc(disc, pav);
+  const ar = avg!==null ? Math.round(avg) : null;
+  const bar = document.getElementById('bar_'+k);
+  const lbl = document.getElementById('avg_'+k);
+  if(bar){ bar.style.width = (ar?Math.min(ar,100):0)+'%'; bar.className = pClass(ar) + (view==='disc'?' pav-bf':''); }
+  if(lbl) lbl.textContent = fmt(ar);
+}
 
-  // Montar cabeçalho: Pavimento | Disciplina — Serviço | ...
-  const header = ['Pavimento'];
-  discsParaExportar.forEach(d => {
-    d.servicos.forEach(s => header.push(d.label.split(' · ')[1] + ' — ' + s.nome));
+function updatePavHeaderInfo(){
+  // header sticky do pavimento ativo
+  const idx = PAVIMENTOS.indexOf(activePav);
+  document.getElementById('pav-label-txt').textContent = activePav;
+  document.getElementById('pav-idx').textContent = String(idx+1).padStart(2,'0')+' / '+PAVIMENTOS.length;
+  const avg = getAvgPavGlobal(activePav);
+  document.getElementById('pav-pct').textContent = fmt(avg!==null?Math.round(avg):null);
+  document.getElementById('pav-prev').disabled = idx<=0;
+  document.getElementById('pav-next').disabled = idx>=PAVIMENTOS.length-1;
+}
+
+function updateSummary(){
+  let totalCampos = 0, campos = 0, pavLanc = 0, soma = 0, cnt = 0;
+  if(view==='pavimento'){
+    // soma todas disciplinas
+    PAVIMENTOS.forEach(pav => {
+      let pavTemDado = false;
+      DISCIPLINAS.forEach(d => {
+        const slots = isGeralMode(d.id, pav) ? 1 : NUM_APTOS;
+        totalCampos += d.servicos.length * slots;
+        d.servicos.forEach(s => {
+          state[d.id][pav].vals[s.id].forEach(v => { if(v!=='' && v!=null){ campos++; pavTemDado=true; } });
+        });
+      });
+      const a = getAvgPavGlobal(pav);
+      if(a!==null){ soma+=a; cnt++; }
+      if(pavTemDado) pavLanc++;
+    });
+    document.getElementById('sg').textContent = cnt ? Math.round(soma/cnt)+'%' : '—';
+    document.getElementById('sg-sub').textContent = 'todas disciplinas';
+  } else {
+    const d = DISCIPLINAS.find(x => x.id===activeDisc);
+    PAVIMENTOS.forEach(pav => {
+      const slots = isGeralMode(d.id, pav) ? 1 : NUM_APTOS;
+      totalCampos += d.servicos.length * slots;
+      let pavTem = false;
+      d.servicos.forEach(s => {
+        state[d.id][pav].vals[s.id].forEach(v => { if(v!=='' && v!=null){ campos++; pavTem=true; } });
+      });
+      if(pavTem) pavLanc++;
+      const a = getAvgDisc(d.id, pav);
+      if(a!==null){ soma+=a; cnt++; }
+    });
+    document.getElementById('sg').textContent = cnt ? Math.round(soma/cnt)+'%' : '—';
+    document.getElementById('sg-sub').textContent = d.label;
+  }
+  document.getElementById('sp').textContent = pavLanc;
+  document.getElementById('sc').textContent = campos;
+  document.getElementById('sct').textContent = 'de '+totalCampos.toLocaleString('pt-BR')+' total';
+  const now = new Date();
+  document.getElementById('sd').textContent = now.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})+' · '+now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  updatePavHeaderInfo();
+}
+
+function rerenderActiveView(){
+  if(view==='pavimento'){ renderViewPavimento(activePav); }
+  else { renderViewDisc(activeDisc); }
+}
+
+// ═══════════════════════════════════════════════════════
+// NAV
+// ═══════════════════════════════════════════════════════
+function setView(v, target){
+  view = v;
+  if(v==='pavimento'){ activePav = target||activePav; }
+  else { activeDisc = target; }
+  // tabs
+  document.querySelectorAll('.dtab').forEach(t => {
+    t.classList.toggle('active',
+      (v==='pavimento' && t.dataset.kind==='overview') ||
+      (v==='disc' && t.dataset.disc===activeDisc));
   });
+  // panels
+  document.getElementById('panel_pavimento').classList.toggle('active', v==='pavimento');
+  document.getElementById('panel_disc').classList.toggle('active', v==='disc');
+  // pav nav
+  document.getElementById('pav-nav').classList.toggle('active', v==='pavimento');
+  rerenderActiveView();
+  updateSummary();
+  // scroll active tab into view
+  const at = document.querySelector('.dtab.active');
+  if(at) at.scrollIntoView({behavior:'smooth',inline:'nearest',block:'nearest'});
+  window.scrollTo({top:0,behavior:'smooth'});
+}
 
+function navPav(delta){
+  const idx = PAVIMENTOS.indexOf(activePav);
+  const ni = idx+delta;
+  if(ni<0 || ni>=PAVIMENTOS.length) return;
+  activePav = PAVIMENTOS[ni];
+  renderViewPavimento(activePav);
+  updateSummary();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function expandAll(){
+  if(view==='pavimento'){
+    document.querySelectorAll('#panel_pavimento .disc-section').forEach(s => s.classList.add('open'));
+  } else {
+    document.querySelectorAll('#panel_disc .pav-block').forEach(b => {
+      const id = b.id.replace('block_','');
+      const body = document.getElementById('body_'+id);
+      if(body && !body.dataset.built){
+        const parts = id.split('_'); // disc_safe + pav_safe — não confiável; usar dataset
+        // fallback: built será setado quando abrir individualmente
+      }
+      b.classList.add('open');
+    });
+    // re-build bodies for opened blocks
+    PAVIMENTOS.forEach(pav => {
+      const k = safeId(activeDisc+'_'+pav);
+      const body = document.getElementById('body_'+k);
+      if(body && !body.dataset.built){
+        body.innerHTML = renderAptosConfig(activeDisc, pav) + renderServicos(activeDisc, pav);
+        body.dataset.built='1';
+      }
+    });
+  }
+}
+
+function collapseAll(){
+  document.querySelectorAll('#panel_pavimento .disc-section, #panel_disc .pav-block').forEach(b => b.classList.remove('open'));
+}
+
+// ═══════════════════════════════════════════════════════
+// BOTTOM SHEET (pavimento picker)
+// ═══════════════════════════════════════════════════════
+function openPavSheet(){
+  updatePavSheet();
+  document.getElementById('sheet-back').classList.add('open');
+  document.getElementById('pav-sheet').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closePavSheet(){
+  document.getElementById('sheet-back').classList.remove('open');
+  document.getElementById('pav-sheet').classList.remove('open');
+  document.body.style.overflow='';
+}
+function updatePavSheet(){
+  const grid = document.getElementById('sheet-grid');
+  grid.innerHTML = PAVIMENTOS.map((p,i) => {
+    const a = getAvgPavGlobal(p);
+    const ar = a!==null ? Math.round(a) : null;
+    const isAc = p===activePav;
+    return `<button class="sheet-item ${isAc?'active':''}" onclick="pickPav('${p.replace(/'/g,"\\'")}')">
+      <div class="si-label">${p}</div>
+      <div class="si-meta">${String(i+1).padStart(2,'0')} · ${ar!==null?ar+'%':'—'}</div>
+      <div class="si-bar"><i style="width:${ar?Math.min(ar,100):0}%"></i></div>
+    </button>`;
+  }).join('');
+}
+function pickPav(p){
+  activePav = p;
+  closePavSheet();
+  renderViewPavimento(activePav);
+  updateSummary();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ═══════════════════════════════════════════════════════
+// EXPORT CSV
+// ═══════════════════════════════════════════════════════
+function exportCSV(){
+  const discsToExport = view==='pavimento' ? DISCIPLINAS : [DISCIPLINAS.find(x => x.id===activeDisc)];
+  const header = ['Pavimento'];
+  discsToExport.forEach(d => d.servicos.forEach(s => header.push(d.code+' '+d.label+' — '+s.nome)));
   const rows = [header];
   PAVIMENTOS.forEach(pav => {
     const row = [pav];
-    discsParaExportar.forEach(d => {
+    discsToExport.forEach(d => {
       const isG = isGeralMode(d.id, pav);
       d.servicos.forEach(s => {
-        if (isG) {
+        if(isG){
           const v = state[d.id][pav].vals[s.id][0];
-          row.push(v !== '' && v != null ? v : '');
+          row.push(v!=='' && v!=null ? v : '');
         } else {
           const avg = getMedia(d.id, pav, s.id);
-          row.push(avg !== null ? Math.round(avg) : '');
+          row.push(avg!==null ? Math.round(avg) : '');
         }
       });
     });
     rows.push(row);
   });
-
   const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
-  const blob = new Blob(['\uFEFF' + csv], {type: 'text/csv;charset=utf-8;'});
+  const blob = new Blob(['\uFEFF'+csv], { type:'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  const nome = discAtiva === 'por-pavimento' ? 'todas-disciplinas' : discAtiva;
-  a.download = 'medicao_' + nome + '_autoria_' + new Date().toISOString().slice(0,10) + '.csv';
+  const nome = view==='pavimento' ? 'todas-disciplinas' : activeDisc;
+  a.download = 'medicao_'+nome+'_autoria_'+new Date().toISOString().slice(0,10)+'.csv';
   a.click();
   URL.revokeObjectURL(url);
 }
 
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 // INIT
-// ═══════════════════════════════════════════
-function init() {
+// ═══════════════════════════════════════════════════════
+function init(){
   initState();
-  const discBar=document.getElementById('disc-bar');
-  const mainEl=document.getElementById('main');
-  const jumpSel=document.getElementById('pav-jump');
+  const discBar = document.getElementById('disc-bar');
+  const main = document.getElementById('main');
 
-  PAVIMENTOS.forEach(pav=>{
-    const opt=document.createElement('option');
-    opt.value=pav;opt.textContent=pav;
-    jumpSel.appendChild(opt);
-  });
+  // Tab "Por Pavimento"
+  const ovTab = document.createElement('button');
+  ovTab.className = 'dtab tab-overview active';
+  ovTab.dataset.kind = 'overview';
+  ovTab.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg> Por Pavimento';
+  ovTab.onclick = () => setView('pavimento');
+  discBar.appendChild(ovTab);
 
-  // Aba "Por Pavimento" — primeira posição
-  const tabPv = document.createElement('button');
-  tabPv.className = 'dtab active';
-  tabPv.dataset.disc = 'por-pavimento';
-  tabPv.textContent = '⊞ Por Pavimento';
-  tabPv.onclick = () => setDisc('por-pavimento');
-  discBar.appendChild(tabPv);
-
-  const panelPv = document.createElement('div');
-  panelPv.className = 'disc-panel active';
-  panelPv.id = 'panel_por-pavimento';
-  mainEl.appendChild(panelPv);
-
-  DISCIPLINAS.forEach((d,di)=>{
-    // Tab
-    const tab=document.createElement('button');
-    tab.className='dtab';
-    tab.dataset.disc=d.id;
-    tab.textContent=d.label;
-    tab.onclick=()=>setDisc(d.id);
+  // Discipline tabs
+  DISCIPLINAS.forEach(d => {
+    const tab = document.createElement('button');
+    tab.className = 'dtab';
+    tab.dataset.disc = d.id;
+    tab.innerHTML = `<span class="dtab-code">${d.code}</span> ${d.label}`;
+    tab.onclick = () => setView('disc', d.id);
     discBar.appendChild(tab);
-
-    // Panel
-    const panel=document.createElement('div');
-    panel.className='disc-panel'+(di===0?' active':'');
-    panel.id='panel_'+d.id;
-
-    PAVIMENTOS.forEach((pav,pi)=>{
-      const k=sid(d.id+'_'+pav);
-      const block=document.createElement('div');
-      block.className='pav-block';
-      block.id='block_'+k;
-      block.innerHTML=`
-        <div class="pav-hdr" onclick="togglePav('${d.id.replace(/'/g,"\\'")}','${pav.replace(/'/g,"\\'")}')">
-          <span class="pav-num">${String(pi+1).padStart(2,'0')}</span>
-          <span class="pav-nm">${pav}</span>
-          <div class="pav-bw"><div class="pav-bf pg-z" id="fill_${k}" style="width:0%"></div></div>
-          <span class="pav-pct" id="prog_${k}">—</span>
-          <span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
-        </div>
-        <div class="pav-body" id="body_${k}"></div>`;
-      panel.appendChild(block);
-    });
-    mainEl.appendChild(panel);
   });
 
-  buildViewPavimento(PAVIMENTOS[5]);
+  // Panels
+  const pPav = document.createElement('div');
+  pPav.className = 'view active';
+  pPav.id = 'panel_pavimento';
+  main.appendChild(pPav);
+
+  const pDisc = document.createElement('div');
+  pDisc.className = 'view';
+  pDisc.id = 'panel_disc';
+  main.appendChild(pDisc);
+
+  // initial render
+  document.getElementById('pav-nav').classList.add('active');
+  renderViewPavimento(activePav);
   updateSummary();
-  sbLoadAll(); // carregar dados do Supabase
-  startPolling(); // verificar mudanças a cada 10s
+
+  // pav nav buttons
+  document.getElementById('pav-prev').onclick = () => navPav(-1);
+  document.getElementById('pav-next').onclick = () => navPav(1);
+
+  // drag scroll for tabs
+  enableDragScroll(discBar);
+
+  // load from server
+  sbLoadAll();
+  startPolling();
 }
 
-init();
-
-
-
-
-// ── DRAG SCROLL nas abas ──────────────────────────────
-(function(){
-  const bar = document.getElementById('disc-bar');
-  let isDragging = false, startX = 0, scrollStart = 0, moved = false;
-
-  bar.addEventListener('mousedown', e => {
-    isDragging = true;
-    moved = false;
-    startX = e.pageX - bar.offsetLeft;
-    scrollStart = bar.scrollLeft;
-    bar.style.cursor = 'grabbing';
+// ═══════════════════════════════════════════════════════
+// DRAG SCROLL TABS
+// ═══════════════════════════════════════════════════════
+function enableDragScroll(el){
+  let isDown=false, startX=0, scrollStart=0, moved=false;
+  el.addEventListener('mousedown', e => {
+    isDown=true; moved=false;
+    startX = e.pageX - el.offsetLeft;
+    scrollStart = el.scrollLeft;
+    el.classList.add('dragging');
   });
-
   document.addEventListener('mousemove', e => {
-    if (!isDragging) return;
-    const x = e.pageX - bar.offsetLeft;
-    const delta = x - startX;
-    if (Math.abs(delta) > 4) moved = true;
-    bar.scrollLeft = scrollStart - delta;
+    if(!isDown) return;
+    const x = e.pageX - el.offsetLeft;
+    const d = x - startX;
+    if(Math.abs(d)>4) moved=true;
+    el.scrollLeft = scrollStart - d;
   });
-
   document.addEventListener('mouseup', () => {
-    isDragging = false;
-    bar.style.cursor = 'grab';
+    isDown=false; el.classList.remove('dragging');
   });
-
-  // Impede clique na aba se foi drag
-  bar.addEventListener('click', e => {
-    if (moved) { e.stopPropagation(); e.preventDefault(); moved = false; }
+  el.addEventListener('click', e => {
+    if(moved){ e.stopPropagation(); e.preventDefault(); moved=false; }
   }, true);
+}
 
-  // Touch (mobile)
-  bar.addEventListener('touchstart', e => {
-    startX = e.touches[0].pageX - bar.offsetLeft;
-    scrollStart = bar.scrollLeft;
-  }, {passive:true});
+// Keyboard navigation for pavimento
+document.addEventListener('keydown', e => {
+  if(view!=='pavimento') return;
+  if(document.activeElement && ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) return;
+  if(e.key==='ArrowLeft'){ navPav(-1); }
+  if(e.key==='ArrowRight'){ navPav(1); }
+});
 
-  bar.addEventListener('touchmove', e => {
-    const x = e.touches[0].pageX - bar.offsetLeft;
-    bar.scrollLeft = scrollStart - (x - startX);
-  }, {passive:true});
-})();
+init();
 </script>
 </body>
 </html>
